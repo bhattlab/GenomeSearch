@@ -24,47 +24,39 @@ def _search(fasta, num_markers, outdir, prefix, force):
     run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
 
 
+def get_marker_genes(protein_fasta_path):
+    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(query, outfile, database).split())
 
-import sys
-import os
+    top_markers = dict()
+    with open(outfile + '.dmd.tsv') as infile:
+        for line in infile:
+            qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore =  line.strip().split('\t')
+            length, evalue, bitscore = int(length), float(evalue), float(bitscore)
+            finding = (qseqid, length, evalue, bitscore)
+            marker = sseqid.split('_')[1]
 
-query = sys.argv[1]
-database = sys.argv[2]
-outfile = sys.argv[3]
-record_suffix = sys.argv[4]
+            if finding[-2] >= 1e-4:
+                continue
 
-run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(query, outfile, database).split())
+            if marker not in top_markers:
+                top_markers[marker] = finding
+            else:
+                if finding[-1] > top_markers[marker][-1]:
+                    top_markers[marker] = finding
 
-top_markers = dict()
-with open(outfile + '.dmd.tsv') as infile:
-	for line in infile:
-		qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore =  line.strip().split('\t')
-		length, evalue, bitscore = int(length), float(evalue), float(bitscore)
-		finding = (qseqid, length, evalue, bitscore)
-		marker = sseqid.split('_')[1]
-
-		if finding[-2] >= 1e-4:
-			continue
-
-		if marker not in top_markers:
-			top_markers[marker] = finding
-		else:
-			if finding[-1] > top_markers[marker][-1]:
-				top_markers[marker] = finding
-
-marker2gene = dict()
-gene2marker = dict()
-for rec in top_markers:
-	marker2gene[rec] = top_markers[rec][0]
-	gene2marker[top_markers[rec][0]] = rec
+    marker2gene = dict()
+    gene2marker = dict()
+    for rec in top_markers:
+        marker2gene[rec] = top_markers[rec][0]
+        gene2marker[top_markers[rec][0]] = rec
 
 
-records = []
-for rec in SeqIO.parse(query, 'fasta'):
-	if rec.id in gene2marker:
-		rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + record_suffix
-		rec.description = rec.id
-		records.append(rec)
+    records = []
+    for rec in SeqIO.parse(query, 'fasta'):
+        if rec.id in gene2marker:
+            rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + record_suffix
+            rec.description = rec.id
+            records.append(rec)
 
-SeqIO.write(records, outfile, 'fasta')
-os.remove(outfile+'.dmd.tsv')
+    SeqIO.write(records, outfile, 'fasta')
+    os.remove(outfile+'.dmd.tsv')
