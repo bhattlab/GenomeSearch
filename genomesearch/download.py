@@ -26,6 +26,14 @@ def _download(threads, force):
         wget.download('https://storage.googleapis.com/genomesearch/downloads/genomesearch.db', SQLDB_PATH)
         click.echo()
 
+    if not isfile(PHYLOPHLAN_MARKER_PATH) or force:
+        if isfile(PHYLOPHLAN_MARKER_PATH):
+            remove(PHYLOPHLAN_MARKER_PATH)
+        click.echo("Downloading phylophlan marker gene references...")
+        makedirs(dirname(PHYLOPHLAN_MARKER_PATH), exist_ok=True)
+        wget.download('https://storage.googleapis.com/genomesearch/downloads/phylophlan_marker_references.dmnd', PHYLOPHLAN_MARKER_PATH)
+        click.echo()
+
     markers = []
     with open(MARKER_RANKS_PATH) as infile:
         for line in infile:
