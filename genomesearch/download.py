@@ -4,8 +4,9 @@ import wget
 from os import makedirs
 from os.path import join, dirname, isfile
 from multiprocessing import Pool
+from itertools import cycle
 
-def _download(threads):
+def _download(threads, force):
     click.echo("#### INPUT PARAMETERS ####")
     try:
         num_markers = int(input("How many markers do you want to use? (This can be any number between 1 and 400)\n[default=150] >> ") or "150")
@@ -17,7 +18,7 @@ def _download(threads):
         num_markers = int(input("How many markers do you want to use?]\n[default=150] >> ") or "150")
     click.echo("####################")
 
-    if not isfile(SQLDB_PATH):
+    if not isfile(SQLDB_PATH) or force:
         click.echo("Downloading DSN1 model...")
         makedirs(dirname(SQLDB_PATH), exist_ok=True)
         wget.download('https://storage.googleapis.com/genomesearch/downloads/genomesearch.db', SQLDB_PATH)
@@ -29,20 +30,21 @@ def _download(threads):
             marker = line.strip()
             markers.append(marker)
 
+    click.echo("Downloading unique marker database...")
     makedirs(UNIQUE_MARKERS_PATH, exist_ok=True)
-    markers = markers[:num_markers]
+    markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
         pool.map(download_unique_marker, markers)
-
     click.echo("Finished downloading...")
 
-def download_unique_marker(marker):
+def download_unique_marker(marker, force):
     remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.dmnd'
     remote_path_tsv = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.tsv'
     local_path_dmnd = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     local_path_tsv = join(UNIQUE_MARKERS_PATH, marker + '.unique.tsv')
 
-    if not isfile(local_path_dmnd):
+    if not isfile(local_path_dmnd) or force:
         wget.download(remote_path_dmnd, local_path_dmnd)
-    if not isfile(local_path_tsv):
+    if not isfile(local_path_tsv) or force:
         wget.download(remote_path_tsv, local_path_tsv)
+    print()

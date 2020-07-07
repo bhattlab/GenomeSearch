@@ -11,9 +11,10 @@ def cli():
 
 @cli.command(short_help='Download the GenomeSearch database', help_priority=1)
 @click.option('--threads', '-t', default=10)
-def download(threads):
-    log_params(threads=threads)
-    _download(threads)
+@click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
+def download(threads, force):
+    log_params(threads=threads, force=force)
+    _download(threads, force)
 
 
 
