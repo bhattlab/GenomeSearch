@@ -6,4 +6,4 @@ SQLDB_PATH = join(dirname(__file__), 'data/genomesearch.db')
 MARKER_RANKS_PATH = join(dirname(__file__), 'data/marker_ranks.txt')
 UNIQUE_MARKERS_PATH = join(dirname(__file__), 'data/unique_markers')
 
-PRODIGAL_PATH = join(dirname(__file__), 'bin/prodigal')
+PRODIGAL_PATH = join(dirname(__file__), 'bin/prodigal.linux')
