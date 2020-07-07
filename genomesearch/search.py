@@ -12,6 +12,7 @@ from collections import defaultdict
 import sqlite3
 from glob import glob
 import numpy as np
+import time
 
 def _search(fasta, num_markers, outdir, prefix, force):
 
@@ -24,15 +25,25 @@ def _search(fasta, num_markers, outdir, prefix, force):
         click.echo("Output directory exists, please delete or overwrite with --force")
         sys.exit(1)
 
+    prodigal_start = time.time()
     click.echo("Running prodigal...")
     run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
+    prodigal_end = time.time()
 
+    marker_gene_start = time.time()
     marker_output = join(outdir, prefix+'.markers.faa')
     click.echo("Identifying marker genes...")
     get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix)
+    marker_gene_end = time.time()
 
+    closest_genomes_start = time.time()
     click.echo("Searching for closest genomes in database...")
     get_closest_genomes(marker_output, num_markers, tmpdir)
+    closest_genomes_end = time.time()
+
+    print("Prodigal runtime: %d" % (prodigal_end-prodigal_start))
+    print("Marker gene runtime: %d" % (marker_gene_end - marker_gene_start))
+    print("Closest genome runtime: %d" % (closest_genomes_end - closest_genomes_start))
 
 
 def get_marker_genes(protein_fasta_path, outfile, prefix):
@@ -123,7 +134,8 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir):
         all_markers.add(marker)
 
         seq_mapping = defaultdict(list)
-        with open('INPUT/unique_markers/' + marker + '.unique.tsv') as infile:
+
+        with open(join(UNIQUE_MARKERS_PATH, marker + '.unique.tsv')) as infile:
             infile.readline()
             for line in infile:
                 line = line.strip().split('\t')
