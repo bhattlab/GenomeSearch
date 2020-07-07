@@ -154,7 +154,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
 
     outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
 
-    print(*(['genome', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+    print(*(['genome', 'taxon_id', 'phylum', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
           file=outfile)
     closest_genomes = []
     for genome in all_pident:
