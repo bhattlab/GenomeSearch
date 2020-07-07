@@ -25,9 +25,9 @@ def _search(fasta, num_markers, outdir, prefix, force):
 
     marker_output = join(outdir, prefix+'.markers.faa')
     click.echo("Identifying marker genes...")
-    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output)
+    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix)
 
-def get_marker_genes(protein_fasta_path, outfile):
+def get_marker_genes(protein_fasta_path, outfile, prefix):
     run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH).split())
 
     top_markers = dict()
@@ -57,7 +57,7 @@ def get_marker_genes(protein_fasta_path, outfile):
     records = []
     for rec in SeqIO.parse(query, 'fasta'):
         if rec.id in gene2marker:
-            rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + record_suffix
+            rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + prefix
             rec.description = rec.id
             records.append(rec)
 
