@@ -11,7 +11,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'wget==3.2'
+        'wget==3.2',
+        'click==7.0'
     ],
     zip_safe=False,
     entry_points = {
