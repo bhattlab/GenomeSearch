@@ -1,4 +1,5 @@
 from genomesearch import *
+import click
 
 def _download():
     click.echo("#### INPUT PARAMETERS ####")
