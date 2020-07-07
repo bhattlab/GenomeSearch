@@ -175,7 +175,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
             [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], len(all_pident[genome]), total_markers,
              np.mean(list(marker_pident.values()))] + pidents)
 
-    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[3])))
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
 
     for res in closest_genomes:
         print(*res, sep='\t', file=outfile)
