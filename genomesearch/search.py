@@ -13,6 +13,7 @@ import sqlite3
 from glob import glob
 import numpy as np
 import time
+from multiprocessing import Pool
 
 def _search(fasta, num_markers, outdir, prefix, force, threads):
 
@@ -119,12 +120,9 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
         marker = rec.id.split('__')[0]
         SeqIO.write([rec], os.path.join(split_markers_dir, marker + '.faa'), 'fasta')
 
-    for marker in markers:
-        db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
-        marker = os.path.basename(db).split('.')[0]
-
-        run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3}'.format(
-            os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db, threads).split())
+    args = [(marker, split_markers_dir, diamond_dir) for marker in markers]
+    with Pool(processes=threads) as pool:
+        pool.starmap(run_unique_marker_search, args)
 
     total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
@@ -187,3 +185,10 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
     gene_count_end = time.time()
 
     return gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
+
+def run_unique_marker_search(marker, split_markers_dir, diamond_dir):
+    db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+    marker = os.path.basename(db).split('.')[0]
+
+    run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(
+        os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db).split())

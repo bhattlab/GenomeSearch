@@ -58,6 +58,7 @@ def download_unique_marker(marker, force):
             remove(local_path_dmnd)
         wget.download(remote_path_dmnd, local_path_dmnd)
         print()
+
     if not isfile(local_path_tsv) or force:
         if isfile(local_path_tsv):
             remove(local_path_tsv)
