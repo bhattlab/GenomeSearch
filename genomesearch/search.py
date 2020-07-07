@@ -7,7 +7,7 @@ import os
 from genomesearch.prodigal import run_prodigal
 from genomesearch import *
 from Bio import SeqIO
-from subprocess import run
+from subprocess import run, DEVNULL
 from collections import defaultdict
 import sqlite3
 from glob import glob
@@ -49,7 +49,8 @@ def _search(fasta, num_markers, outdir, prefix, force, threads):
 
 
 def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
-    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3} &> /dev/null'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads).split())
+    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3}'.format(
+        protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads).split(), stdout=DEVNULL)
 
     top_markers = dict()
     with open(outfile + '.dmd.tsv') as infile:
@@ -186,9 +187,11 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
 
     return gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
+
 def run_unique_marker_search(marker, split_markers_dir, diamond_dir):
     db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} &> /dev/null'.format(
-        os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db).split())
+    run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(
+        os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db).split(),
+        stdout=DEVNULL)
