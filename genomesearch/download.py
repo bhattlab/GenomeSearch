@@ -19,7 +19,7 @@ def _download(threads, force):
     click.echo("####################")
 
     if not isfile(SQLDB_PATH) or force:
-        click.echo("Downloading DSN1 model...")
+        click.echo("Downloading genomesearch SQL database...")
         makedirs(dirname(SQLDB_PATH), exist_ok=True)
         wget.download('https://storage.googleapis.com/genomesearch/downloads/genomesearch.db', SQLDB_PATH)
         click.echo()
@@ -30,7 +30,7 @@ def _download(threads, force):
             marker = line.strip()
             markers.append(marker)
 
-    click.echo("Downloading unique marker database...")
+    click.echo("Downloading unique marker gene database...")
     makedirs(UNIQUE_MARKERS_PATH, exist_ok=True)
     markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
