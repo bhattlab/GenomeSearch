@@ -12,7 +12,8 @@ setup(
     include_package_data=True,
     install_requires=[
         'wget==3.2',
-        'click==7.0'
+        'click==7.0',
+        'biopython==1.76'
     ],
     zip_safe=False,
     entry_points = {

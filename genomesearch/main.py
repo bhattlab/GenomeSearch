@@ -20,13 +20,14 @@ def download(threads, force):
 
 @cli.command(short_help='Run deepsmorfnet on a complete or draft sequence of a single species.', help_priority=1)
 @click.argument('fasta', type=click.Path(exists=True))
-@click.option('--outfile', '-o', default='genomesearch_output.tsv')
-def search(fasta, outfile):
+@click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
+@click.option('--outfile', '-o', default='genomesearch_output', help='The name of the output directory.')
+@click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
+@click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
+def search(fasta, num_markers, outdir, prefix, force):
     """A click access point for the run module. This is used for creating the command line interface."""
-    log_params(fasta=fasta, outfile=outfile)
-
-    _search(fasta, outfile)
-
+    log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force)
+    _search(fasta, num_markers, outdir, prefix, force)
 
 
 def log_params(**kwargs):
