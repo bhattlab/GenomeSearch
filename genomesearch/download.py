@@ -29,6 +29,7 @@ def _download(threads):
             marker = line.strip()
             markers.append(marker)
 
+    makedirs(UNIQUE_MARKERS_PATH, exist_ok=True)
     markers = markers[:num_markers]
     with Pool(processes=threads) as pool:
         pool.map(download_unique_marker, markers)
