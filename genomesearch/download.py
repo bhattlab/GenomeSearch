@@ -34,7 +34,7 @@ def _download(threads, force):
     makedirs(UNIQUE_MARKERS_PATH, exist_ok=True)
     markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
-        pool.map(download_unique_marker, markers)
+        pool.starmap(download_unique_marker, markers)
     click.echo("Finished downloading...")
 
 def download_unique_marker(marker, force):
