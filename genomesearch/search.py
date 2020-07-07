@@ -32,7 +32,7 @@ def _search(fasta, num_markers, outdir, prefix, force):
     get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix)
 
     click.echo("Searching for closest genomes in database...")
-    get_marker_genes(marker_output, num_markers, tmpdir)
+    get_closest_genomes(marker_output, num_markers, tmpdir)
 
 
 def get_marker_genes(protein_fasta_path, outfile, prefix):
