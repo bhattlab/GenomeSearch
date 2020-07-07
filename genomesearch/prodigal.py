@@ -9,7 +9,7 @@ from itertools import cycle
 
 
 def run_prodigal(prodigal_path, infile, outdir, meta):
-    bashCommand = '{prodigal} -c -f gff -o {gff} -a {faa} -d {ffn} -i {input}'.format(
+    bashCommand = '{prodigal} -c -f gff -o {gff} -a {faa} -d {ffn} -i {input} &> /dev/null'.format(
         prodigal=prodigal_path, gff=join(outdir, 'prodigal.gff'), faa=join(outdir, 'prodigal.faa'),
         ffn=join(outdir, 'prodigal.ffn'), input=infile
     )

@@ -49,7 +49,7 @@ def _search(fasta, num_markers, outdir, prefix, force, threads):
 
 
 def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
-    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3}'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads).split())
+    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3} &> /dev/null'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads).split())
 
     top_markers = dict()
     with open(outfile + '.dmd.tsv') as infile:
@@ -190,5 +190,5 @@ def run_unique_marker_search(marker, split_markers_dir, diamond_dir):
     db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(
+    run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} &> /dev/null'.format(
         os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db).split())
