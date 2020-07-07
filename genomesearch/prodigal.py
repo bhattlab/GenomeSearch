@@ -16,7 +16,7 @@ def run_prodigal(prodigal_path, infile, outdir, meta):
     if meta == True:
         bashCommand += ' -p meta'
     print('prodigal command:', bashCommand)
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.DEVNULL)
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     output, error = process.communicate()
 
 def run_prodigal_simple(prodigal_path, infile, outprefix):
