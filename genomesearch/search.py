@@ -36,16 +36,14 @@ def _search(fasta, num_markers, outdir, prefix, force, threads):
     get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix, threads)
     marker_gene_end = time.time()
 
-    closest_genomes_start = time.time()
     click.echo("Searching for closest genomes in database...")
-    gene_count_time = get_closest_genomes(marker_output, num_markers, tmpdir, threads)
-    closest_genomes_end = time.time()
+    gene_count_time, closest_genomes_time = get_closest_genomes(marker_output, num_markers, tmpdir, threads)
 
     print()
     print("COMPLETE.")
     print("Prodigal runtime: %f" % (prodigal_end-prodigal_start))
     print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
-    print("Closest genome runtime: %f" % (closest_genomes_end - closest_genomes_start))
+    print("Closest genome runtime: %f" % closest_genomes_time)
     print("Gene count runtime: %f" % gene_count_time)
 
 
@@ -88,7 +86,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
 
 def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
-
+    closest_genomes_start = time.time()
     markers = []
     with open(MARKER_RANKS_PATH) as infile:
         for line in infile:
@@ -129,7 +127,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
             os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db, threads).split())
 
     total_markers = len(glob(diamond_dir + '/*tsv'))
-
+    closest_genomes_end = time.time()
     gene_count_start = time.time()
     all_markers = set()
     all_pident = defaultdict(list)
@@ -188,4 +186,4 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
 
     gene_count_end = time.time()
 
-    return gene_count_end - gene_count_start
+    return gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
