@@ -23,9 +23,12 @@ def _search(fasta, num_markers, outdir, prefix, force):
     click.echo("Running prodigal...")
     run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
 
+    marker_output = join(outdir, prefix+'.markers.faa')
+    click.echo("Identifying marker genes...")
+    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output)
 
-def get_marker_genes(protein_fasta_path):
-    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(query, outfile, database).split())
+def get_marker_genes(protein_fasta_path, outfile):
+    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH).split())
 
     top_markers = dict()
     with open(outfile + '.dmd.tsv') as infile:
