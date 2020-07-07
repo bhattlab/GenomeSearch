@@ -10,8 +10,10 @@ def cli():
     pass
 
 @cli.command(short_help='Download the GenomeSearch database', help_priority=1)
-def download():
-    _download()
+@click.option('--threads', '-t', default=10)
+def download(threads):
+    log_params(threads=threads)
+    _download(threads)
 
 
 
