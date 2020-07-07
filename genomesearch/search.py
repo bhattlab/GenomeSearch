@@ -55,7 +55,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix):
 
 
     records = []
-    for rec in SeqIO.parse(query, 'fasta'):
+    for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
         if rec.id in gene2marker:
             rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + prefix
             rec.description = rec.id
