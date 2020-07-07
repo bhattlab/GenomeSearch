@@ -14,7 +14,7 @@ from glob import glob
 import numpy as np
 import time
 
-def _search(fasta, num_markers, outdir, prefix, force):
+def _search(fasta, num_markers, outdir, prefix, force, threads):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -33,21 +33,23 @@ def _search(fasta, num_markers, outdir, prefix, force):
     marker_gene_start = time.time()
     marker_output = join(outdir, prefix+'.markers.faa')
     click.echo("Identifying marker genes...")
-    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix)
+    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix, threads)
     marker_gene_end = time.time()
 
     closest_genomes_start = time.time()
     click.echo("Searching for closest genomes in database...")
-    get_closest_genomes(marker_output, num_markers, tmpdir)
+    get_closest_genomes(marker_output, num_markers, tmpdir, threads)
     closest_genomes_end = time.time()
 
-    print("Prodigal runtime: %d" % (prodigal_end-prodigal_start))
-    print("Marker gene runtime: %d" % (marker_gene_end - marker_gene_start))
-    print("Closest genome runtime: %d" % (closest_genomes_end - closest_genomes_start))
+    print()
+    print("COMPLETE.")
+    print("Prodigal runtime: %f" % (prodigal_end-prodigal_start))
+    print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
+    print("Closest genome runtime: %f" % (closest_genomes_end - closest_genomes_start))
 
 
-def get_marker_genes(protein_fasta_path, outfile, prefix):
-    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH).split())
+def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
+    run('diamond blastp --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3}'.format(protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads).split())
 
     top_markers = dict()
     with open(outfile + '.dmd.tsv') as infile:
@@ -83,7 +85,8 @@ def get_marker_genes(protein_fasta_path, outfile, prefix):
     SeqIO.write(records, outfile, 'fasta')
     os.remove(outfile+'.dmd.tsv')
 
-def get_closest_genomes(marker_genes_fasta, num_markers, outdir):
+
+def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
 
     markers = []
     with open(MARKER_RANKS_PATH) as infile:
@@ -121,8 +124,8 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir):
         db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
         marker = os.path.basename(db).split('.')[0]
 
-        run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2}'.format(
-            os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db).split())
+        run('diamond blastp -k 1000 --query {0} --out {1}.dmd.tsv --outfmt 6 --db {2} --threads {3}'.format(
+            os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db, threads).split())
 
     total_markers = len(glob(diamond_dir + '/*tsv'))
 

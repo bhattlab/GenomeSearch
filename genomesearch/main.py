@@ -24,10 +24,11 @@ def download(threads, force):
 @click.option('--outdir', '-o', default='genomesearch_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
-def search(fasta, num_markers, outdir, prefix, force):
+@click.option('--threads', '-t', default=10)
+def search(fasta, num_markers, outdir, prefix, force, threads):
     """A click access point for the run module. This is used for creating the command line interface."""
-    log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force)
-    _search(fasta, num_markers, outdir, prefix, force)
+    log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads)
+    _search(fasta, num_markers, outdir, prefix, force, threads)
 
 
 def log_params(**kwargs):
