@@ -95,7 +95,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
             records.append(rec)
 
     SeqIO.write(records, outfile, 'fasta')
-    os.remove(outfile+'.dmd.tsv')
+    #os.remove(outfile+'.dmd.tsv')
 
 
 def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
