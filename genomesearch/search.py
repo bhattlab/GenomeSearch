@@ -132,7 +132,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
         for line in infile:
             marker = line.strip()
             if marker in marker2path:
-                markers.append(markers)
+                markers.append(marker)
                 count += 1
             if count == num_markers:
                 break
