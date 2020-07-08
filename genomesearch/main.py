@@ -25,11 +25,12 @@ def download(threads, force):
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
 @click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
-def search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs):
+@click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
+def search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
-               max_target_seqs=max_target_seqs)
-    _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs)
+               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate)
+    _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate)
 
 
 def log_params(**kwargs):

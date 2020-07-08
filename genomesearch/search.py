@@ -16,7 +16,7 @@ import time
 from multiprocessing import Pool
 import pickle
 
-def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs):
+def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -39,8 +39,15 @@ def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs)
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
-    gene_count_time, closest_genomes_time = get_closest_genomes(marker_output, num_markers, tmpdir,
-                                                                threads, max_target_seqs)
+    closest_genomes_path, gene_count_time, closest_genomes_time = get_closest_genomes(
+        marker_output, num_markers, tmpdir, threads, max_target_seqs
+    )
+
+    outpath = join(outdir, prefix+'.closest_genomes.tsv')
+    shutil.move(closest_genomes_path, outpath)
+
+    if not keep_intermediate:
+        shutil.rmtree(tmpdir)
 
     print()
     print("COMPLETE.")
@@ -93,14 +100,6 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
 def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
-    markers = []
-    with open(MARKER_RANKS_PATH) as infile:
-        for line in infile:
-            marker = line.strip()
-            markers.append(marker)
-
-    markers = markers[:num_markers]
-
     conn = sqlite3.connect(SQLDB_PATH)
     c = conn.cursor()
 
@@ -121,9 +120,22 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
     os.makedirs(split_markers_dir, exist_ok=True)
     os.makedirs(diamond_dir, exist_ok=True)
 
+    marker2path = dict()
     for rec in SeqIO.parse(marker_genes_fasta, 'fasta'):
         marker = rec.id.split('__')[0]
         SeqIO.write([rec], os.path.join(split_markers_dir, marker + '.faa'), 'fasta')
+        marker2path[marker] = os.path.join(split_markers_dir, marker + '.faa')
+
+    markers = []
+    with open(MARKER_RANKS_PATH) as infile:
+        count = 0
+        for line in infile:
+            marker = line.strip()
+            if marker in marker2path:
+                markers.append(markers)
+                count += 1
+            if count == num_markers:
+                break
 
     args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
     with Pool(processes=threads) as pool:
@@ -183,7 +195,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
 
     gene_count_end = time.time()
 
-    return gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
+    return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
 
 def run_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
