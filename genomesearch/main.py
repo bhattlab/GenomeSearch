@@ -26,11 +26,12 @@ def download(threads, force):
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
 @click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
-def search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate):
+@click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
+def search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
-               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate)
-    _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate)
+               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
+    _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type=fasta_type)
 
 
 def log_params(**kwargs):

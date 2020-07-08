@@ -16,7 +16,7 @@ import time
 from multiprocessing import Pool
 import pickle
 
-def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate):
+def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -27,16 +27,25 @@ def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
         click.echo("Output directory exists, please delete or overwrite with --force")
         sys.exit(1)
 
-    prodigal_start = time.time()
-    click.echo("Running prodigal...")
-    run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
-    prodigal_end = time.time()
 
-    marker_gene_start = time.time()
-    marker_output = join(outdir, prefix+'.markers.faa')
-    click.echo("Identifying marker genes...")
-    get_marker_genes(join(tmpdir, 'prodigal.faa'), marker_output, prefix, threads)
-    marker_gene_end = time.time()
+    if fasta_type == 'genome':
+        prodigal_start = time.time()
+        click.echo("Running prodigal...")
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
+        prodigal_end = time.time()
+        proteome_path = join(tmpdir, 'prodigal.faa')
+    elif fasta_type == 'proteome':
+        proteome_path = fasta
+
+
+    if fasta_type == 'proteome':
+        marker_gene_start = time.time()
+        marker_output = join(outdir, prefix+'.markers.faa')
+        click.echo("Identifying marker genes...")
+        get_marker_genes(proteome_path, marker_output, prefix, threads)
+        marker_gene_end = time.time()
+    elif fasta_type == 'markers':
+        marker_output = fasta
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_closest_genomes(
