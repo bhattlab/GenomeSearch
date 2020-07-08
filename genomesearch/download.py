@@ -6,6 +6,7 @@ from os.path import join, dirname, isfile
 from multiprocessing import Pool
 from itertools import cycle
 
+
 def _download(threads, force):
     click.echo("#### INPUT PARAMETERS ####")
     try:
@@ -47,11 +48,12 @@ def _download(threads, force):
         pool.starmap(download_unique_marker, markers)
     click.echo("Finished downloading...")
 
+
 def download_unique_marker(marker, force):
     remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.dmnd'
-    remote_path_tsv = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.tsv'
+    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.pkl'
     local_path_dmnd = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
-    local_path_tsv = join(UNIQUE_MARKERS_PATH, marker + '.unique.tsv')
+    local_path_pkl = join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
 
     if not isfile(local_path_dmnd) or force:
         if isfile(local_path_dmnd):
@@ -59,8 +61,8 @@ def download_unique_marker(marker, force):
         wget.download(remote_path_dmnd, local_path_dmnd)
         print()
 
-    if not isfile(local_path_tsv) or force:
-        if isfile(local_path_tsv):
-            remove(local_path_tsv)
-        wget.download(remote_path_tsv, local_path_tsv)
+    if not isfile(local_path_pkl) or force:
+        if isfile(local_path_pkl):
+            remove(local_path_pkl)
+        wget.download(remote_path_pkl, local_path_pkl)
         print()

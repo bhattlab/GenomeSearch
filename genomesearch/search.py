@@ -14,6 +14,7 @@ from glob import glob
 import numpy as np
 import time
 from multiprocessing import Pool
+import pickle
 
 def _search(fasta, num_markers, outdir, prefix, force, threads):
 
@@ -138,13 +139,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
         marker = os.path.basename(f1).split('.')[0]
         all_markers.add(marker)
 
-        seq_mapping = defaultdict(list)
-
-        with open(join(UNIQUE_MARKERS_PATH, marker + '.unique.tsv')) as infile:
-            infile.readline()
-            for line in infile:
-                line = line.strip().split('\t')
-                seq_mapping[line[0]].append(line[1])
+        seq_mapping = pickle.load(open(join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "wb"))
 
         with open(diamond_dir + '/' + marker + '.dmd.tsv') as infile:
             for line in infile:
