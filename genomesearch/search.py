@@ -79,7 +79,6 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
         marker2gene[rec] = top_markers[rec][0]
         gene2marker[top_markers[rec][0]] = rec
 
-
     records = []
     for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
         if rec.id in gene2marker:
@@ -139,7 +138,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
         marker = os.path.basename(f1).split('.')[0]
         all_markers.add(marker)
 
-        seq_mapping = pickle.load(open(join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "wb"))
+        seq_mapping = pickle.load(open(join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
 
         with open(diamond_dir + '/' + marker + '.dmd.tsv') as infile:
             for line in infile:
