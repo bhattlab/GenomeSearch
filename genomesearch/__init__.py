@@ -1,6 +1,6 @@
 from os.path import join, dirname, isfile
 
-__version__ = '0.0.1_dev'
+__version__ = '0.0.2_dev'
 
 SQLDB_PATH = join(dirname(__file__), 'data/genomesearch.db')
 PHYLOPHLAN_MARKER_PATH = join(dirname(__file__), 'data/phylophlan_marker_references.dmnd')
