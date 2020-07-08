@@ -16,7 +16,7 @@ import time
 from multiprocessing import Pool
 import pickle
 
-def _search(fasta, num_markers, outdir, prefix, force, threads):
+def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -39,7 +39,8 @@ def _search(fasta, num_markers, outdir, prefix, force, threads):
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
-    gene_count_time, closest_genomes_time = get_closest_genomes(marker_output, num_markers, tmpdir, threads)
+    gene_count_time, closest_genomes_time = get_closest_genomes(marker_output, num_markers, tmpdir,
+                                                                threads, max_target_seqs)
 
     print()
     print("COMPLETE.")
@@ -90,7 +91,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
     os.remove(outfile+'.dmd.tsv')
 
 
-def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
+def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
     markers = []
     with open(MARKER_RANKS_PATH) as infile:
@@ -124,7 +125,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
         marker = rec.id.split('__')[0]
         SeqIO.write([rec], os.path.join(split_markers_dir, marker + '.faa'), 'fasta')
 
-    args = [(marker, split_markers_dir, diamond_dir) for marker in markers]
+    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
     with Pool(processes=threads) as pool:
         pool.starmap(run_unique_marker_search, args)
 
@@ -185,11 +186,12 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads):
     return gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
 
-def run_unique_marker_search(marker, split_markers_dir, diamond_dir):
+def run_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
     db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    command = '{0} blastp -k 1000 --query {1} --out {2}.dmd.tsv --outfmt 6 --db {3}'.format(
-        DIAMOND_PATH, os.path.join(split_markers_dir, marker + '.faa'), os.path.join(diamond_dir, marker), db)
+    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
+        DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
+        os.path.join(diamond_dir, marker), db)
     print('diamond command:', command)
     run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
