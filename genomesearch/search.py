@@ -165,10 +165,10 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
     for line in c.fetchall():
         genome2taxid[line[0]] = line[1]
 
-    c.execute("SELECT taxon_id,phylum,species FROM taxon;")
+    c.execute("SELECT taxon_id,phylum,family,species FROM taxon;")
     taxon2species = dict()
     for line in c.fetchall():
-        taxon2species[line[0]] = (line[1], line[2])
+        taxon2species[line[0]] = (line[1], line[2], line[3])
 
     split_markers_dir = os.path.join(outdir, 'markers')
     diamond_dir = os.path.join(outdir, 'diamond')
@@ -221,7 +221,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
 
     outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
 
-    print(*(['genome', 'taxon_id', 'phylum', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+    print(*(['genome', 'taxon_id', 'phylum', 'family', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
           file=outfile)
     closest_genomes = []
     for genome in all_pident:
@@ -239,8 +239,8 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
             except:
                 pidents.append(None)
         closest_genomes.append(
-            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], len(all_pident[genome]), total_markers,
-             np.mean(list(marker_pident.values()))] + pidents)
+            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
+             len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
     closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
 
@@ -265,10 +265,10 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
     for line in c.fetchall():
         genome2taxid[line[0]] = line[1]
 
-    c.execute("SELECT taxon_id,phylum,species FROM taxon;")
+    c.execute("SELECT taxon_id,phylum,family,species FROM taxon;")
     taxon2species = dict()
     for line in c.fetchall():
-        taxon2species[line[0]] = (line[1], line[2])
+        taxon2species[line[0]] = (line[1], line[2], line[3])
 
     split_markers_dir = os.path.join(outdir, 'markers')
     diamond_dir = os.path.join(outdir, 'diamond')
@@ -321,7 +321,7 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
 
     outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
 
-    print(*(['genome', 'taxon_id', 'phylum', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+    print(*(['genome', 'taxon_id', 'phylum', 'family', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
           file=outfile)
     closest_genomes = []
     for genome in all_pident:
@@ -339,8 +339,8 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
             except:
                 pidents.append(None)
         closest_genomes.append(
-            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], len(all_pident[genome]), total_markers,
-             np.mean(list(marker_pident.values()))] + pidents)
+            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
+             len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
     closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
 
