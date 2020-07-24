@@ -52,16 +52,16 @@ def _download(threads, force):
 
     click.echo("Downloading refbank unique marker gene database...")
     makedirs(REFBANK_UNIQUE_MARKERS_PATH, exist_ok=True)
-    markers = list(zip(markers[:num_markers], cycle([force])))
+    select_markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
-        pool.starmap(download_refbank_unique_marker, markers)
+        pool.starmap(download_refbank_unique_marker, select_markers)
     click.echo("Finished downloading...")
 
     click.echo("Downloading meta unique marker gene database...")
     makedirs(META_UNIQUE_MARKERS_PATH, exist_ok=True)
-    markers = list(zip(markers[:num_markers], cycle([force])))
+    select_markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
-        pool.starmap(download_meta_unique_marker, markers)
+        pool.starmap(download_meta_unique_marker, select_markers)
     click.echo("Finished downloading...")
 
 
