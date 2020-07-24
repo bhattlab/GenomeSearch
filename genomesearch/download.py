@@ -8,6 +8,7 @@ from itertools import cycle
 
 
 def _download(threads, force):
+
     click.echo("#### INPUT PARAMETERS ####")
     try:
         num_markers = int(input("How many marker genes do you want to use? (This can be any number between 1 and 400)\n[default=150] >> ") or "150")
@@ -19,12 +20,20 @@ def _download(threads, force):
         num_markers = int(input("How many marker genes do you want to use?]\n[default=150] >> ") or "150")
     click.echo("####################")
 
-    if not isfile(SQLDB_PATH) or force:
-        if isfile(SQLDB_PATH):
-            remove(SQLDB_PATH)
-        click.echo("Downloading genomesearch SQL database...")
-        makedirs(dirname(SQLDB_PATH), exist_ok=True)
-        wget.download('https://storage.googleapis.com/genomesearch/downloads/genomesearch.db', SQLDB_PATH)
+    if not isfile(REFBANK_SQLDB_PATH) or force:
+        if isfile(REFBANK_SQLDB_PATH):
+            remove(REFBANK_SQLDB_PATH)
+        click.echo("Downloading refbank genomesearch SQL database...")
+        makedirs(dirname(REFBANK_SQLDB_PATH), exist_ok=True)
+        wget.download('https://storage.googleapis.com/genomesearch/downloads/refbank_genomesearch.db', REFBANK_SQLDB_PATH)
+        click.echo()
+
+    if not isfile(META_SQLDB_PATH) or force:
+        if isfile(META_SQLDB_PATH):
+            remove(META_SQLDB_PATH)
+        click.echo("Downloading meta genomesearch SQL database...")
+        makedirs(dirname(META_SQLDB_PATH), exist_ok=True)
+        wget.download('https://storage.googleapis.com/genomesearch/downloads/meta_genomesearch.db', META_SQLDB_PATH)
         click.echo()
 
     if not isfile(PHYLOPHLAN_MARKER_PATH) or force:
@@ -36,24 +45,50 @@ def _download(threads, force):
         click.echo()
 
     markers = []
-    with open(MARKER_RANKS_PATH) as infile:
+    with open(REFBANK_MARKER_RANKS_PATH) as infile:
         for line in infile:
             marker = line.strip()
             markers.append(marker)
 
-    click.echo("Downloading unique marker gene database...")
-    makedirs(UNIQUE_MARKERS_PATH, exist_ok=True)
+    click.echo("Downloading refbank unique marker gene database...")
+    makedirs(REFBANK_UNIQUE_MARKERS_PATH, exist_ok=True)
     markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
-        pool.starmap(download_unique_marker, markers)
+        pool.starmap(download_refbank_unique_marker, markers)
+    click.echo("Finished downloading...")
+
+    click.echo("Downloading meta unique marker gene database...")
+    makedirs(META_UNIQUE_MARKERS_PATH, exist_ok=True)
+    markers = list(zip(markers[:num_markers], cycle([force])))
+    with Pool(processes=threads) as pool:
+        pool.starmap(download_meta_unique_marker, markers)
     click.echo("Finished downloading...")
 
 
-def download_unique_marker(marker, force):
-    remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.dmnd'
-    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/unique_markers/' + marker + '.unique.pkl'
-    local_path_dmnd = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
-    local_path_pkl = join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
+def download_refbank_unique_marker(marker, force):
+    remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/refbank_unique_markers/' + marker + '.unique.dmnd'
+    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/refbank_unique_markers/' + marker + '.unique.pkl'
+    local_path_dmnd = join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+    local_path_pkl = join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
+
+    if not isfile(local_path_dmnd) or force:
+        if isfile(local_path_dmnd):
+            remove(local_path_dmnd)
+        wget.download(remote_path_dmnd, local_path_dmnd)
+        print()
+
+    if not isfile(local_path_pkl) or force:
+        if isfile(local_path_pkl):
+            remove(local_path_pkl)
+        wget.download(remote_path_pkl, local_path_pkl)
+        print()
+
+
+def download_meta_unique_marker(marker, force):
+    remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/meta_unique_markers/' + marker + '.unique.dmnd'
+    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/meta_unique_markers/' + marker + '.unique.pkl'
+    local_path_dmnd = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+    local_path_pkl = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
 
     if not isfile(local_path_dmnd) or force:
         if isfile(local_path_dmnd):

@@ -16,7 +16,8 @@ import time
 from multiprocessing import Pool
 import pickle
 
-def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+
+def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -46,7 +47,55 @@ def _search(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
-    closest_genomes_path, gene_count_time, closest_genomes_time = get_closest_genomes(
+    closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes(
+        marker_output, num_markers, tmpdir, threads, max_target_seqs
+    )
+
+    outpath = join(outdir, prefix+'.closest_genomes.tsv')
+    shutil.move(closest_genomes_path, outpath)
+
+    if not keep_intermediate:
+        shutil.rmtree(tmpdir)
+
+    print()
+    print("COMPLETE.")
+    print("Prodigal runtime: %f" % (prodigal_end-prodigal_start))
+    print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
+    print("Closest genome runtime: %f" % closest_genomes_time)
+    print("Gene count runtime: %f" % gene_count_time)
+
+
+def _meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+
+    tmpdir = join(outdir, 'tmp')
+    if force and isdir(outdir):
+        shutil.rmtree(outdir)
+    try:
+        makedirs(tmpdir)
+    except FileExistsError:
+        click.echo("Output directory exists, please delete or overwrite with --force")
+        sys.exit(1)
+
+    prodigal_start = time.time()
+    if fasta_type == 'genome':
+        click.echo("Running prodigal...")
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
+        proteome_path = join(tmpdir, 'prodigal.faa')
+    elif fasta_type == 'proteome':
+        proteome_path = fasta
+    prodigal_end = time.time()
+
+    marker_gene_start = time.time()
+    if fasta_type == 'proteome':
+        marker_output = join(outdir, prefix+'.markers.faa')
+        click.echo("Identifying marker genes...")
+        get_marker_genes(proteome_path, marker_output, prefix, threads)
+    elif fasta_type == 'markers':
+        marker_output = fasta
+    marker_gene_end = time.time()
+
+    click.echo("Searching for closest genomes in database...")
+    closest_genomes_path, gene_count_time, closest_genomes_time = get_meta_closest_genomes(
         marker_output, num_markers, tmpdir, threads, max_target_seqs
     )
 
@@ -105,9 +154,9 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
     #os.remove(outfile+'.dmd.tsv')
 
 
-def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
-    conn = sqlite3.connect(SQLDB_PATH)
+    conn = sqlite3.connect(REFBANK_SQLDB_PATH)
     c = conn.cursor()
 
     c.execute("SELECT genome_id, taxon_id FROM genome;")
@@ -134,7 +183,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
         marker2path[marker] = os.path.join(split_markers_dir, marker + '.faa')
 
     markers = []
-    with open(MARKER_RANKS_PATH) as infile:
+    with open(REFBANK_MARKER_RANKS_PATH) as infile:
         count = 0
         for line in infile:
             marker = line.strip()
@@ -146,7 +195,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
 
     args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
     with Pool(processes=threads) as pool:
-        pool.starmap(run_unique_marker_search, args)
+        pool.starmap(run_refbank_unique_marker_search, args)
 
     total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
@@ -158,7 +207,7 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
         marker = os.path.basename(f1).split('.')[0]
         all_markers.add(marker)
 
-        seq_mapping = pickle.load(open(join(UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
+        seq_mapping = pickle.load(open(join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
 
         with open(diamond_dir + '/' + marker + '.dmd.tsv') as infile:
             for line in infile:
@@ -205,8 +254,119 @@ def get_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_ta
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
 
-def run_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
-    db = join(UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+    closest_genomes_start = time.time()
+    conn = sqlite3.connect(META_SQLDB_PATH)
+    c = conn.cursor()
+
+    c.execute("SELECT genome_id, taxon_id FROM genome;")
+
+    genome2taxid = dict()
+    for line in c.fetchall():
+        genome2taxid[line[0]] = line[1]
+
+    c.execute("SELECT taxon_id,phylum,species FROM taxon;")
+    taxon2species = dict()
+    for line in c.fetchall():
+        taxon2species[line[0]] = (line[1], line[2])
+
+    split_markers_dir = os.path.join(outdir, 'markers')
+    diamond_dir = os.path.join(outdir, 'diamond')
+
+    os.makedirs(split_markers_dir, exist_ok=True)
+    os.makedirs(diamond_dir, exist_ok=True)
+
+    marker2path = dict()
+    for rec in SeqIO.parse(marker_genes_fasta, 'fasta'):
+        marker = rec.id.split('__')[0]
+        SeqIO.write([rec], os.path.join(split_markers_dir, marker + '.faa'), 'fasta')
+        marker2path[marker] = os.path.join(split_markers_dir, marker + '.faa')
+
+    markers = []
+    with open(META_MARKER_RANKS_PATH) as infile:
+        count = 0
+        for line in infile:
+            marker = line.strip()
+            if marker in marker2path:
+                markers.append(marker)
+                count += 1
+            if count == num_markers:
+                break
+
+    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
+    with Pool(processes=threads) as pool:
+        pool.starmap(run_meta_unique_marker_search, args)
+
+    total_markers = len(glob(diamond_dir + '/*tsv'))
+    closest_genomes_end = time.time()
+    gene_count_start = time.time()
+    all_markers = set()
+    all_pident = defaultdict(list)
+    for f1 in glob(diamond_dir + '/*tsv'):
+
+        marker = os.path.basename(f1).split('.')[0]
+        all_markers.add(marker)
+
+        seq_mapping = pickle.load(open(join(META_UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
+
+        with open(diamond_dir + '/' + marker + '.dmd.tsv') as infile:
+            for line in infile:
+                qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore = line.strip().split(
+                    '\t')
+                pident, evalue = float(pident), float(evalue)
+                if evalue >= 1e-4:
+                    continue
+                for genome in seq_mapping[sseqid]:
+                    all_pident[genome].append((marker, pident))
+
+    outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
+
+    print(*(['genome', 'taxon_id', 'phylum', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+          file=outfile)
+    closest_genomes = []
+    for genome in all_pident:
+
+        taxid = genome2taxid[int(genome)]
+
+        if len(all_pident[genome]) / float(total_markers) < 0.25:
+            continue
+
+        marker_pident = dict(all_pident[genome])
+        pidents = []
+        for marker in all_markers:
+            try:
+                pidents.append(marker_pident[marker])
+            except:
+                pidents.append(None)
+        closest_genomes.append(
+            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], len(all_pident[genome]), total_markers,
+             np.mean(list(marker_pident.values()))] + pidents)
+
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
+
+    for res in closest_genomes:
+        print(*res, sep='\t', file=outfile)
+
+    outfile.close()
+
+    gene_count_end = time.time()
+
+    return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
+
+
+def run_refbank_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
+    db = join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+    marker = os.path.basename(db).split('.')[0]
+
+    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
+        DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
+        os.path.join(diamond_dir, marker), db)
+    print('diamond command:', command)
+    run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
+
+
+def run_meta_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
+    db = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
     command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(

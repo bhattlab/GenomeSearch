@@ -1,3 +1,4 @@
-include genomesearch/data/marker_ranks.txt
+include genomesearch/data/refbank_marker_ranks.txt
+include genomesearch/data/meta_marker_ranks.txt
 include genomesearch/bin/prodigal.linux
 include genomesearch/bin/diamond
