@@ -1,6 +1,6 @@
 from os.path import join, dirname, isfile
 
-__version__ = '0.0.3_dev'
+__version__ = '0.0.4_dev'
 
 REFBANK_SQLDB_PATH = join(dirname(__file__), 'data/refbank_genomesearch.db')
 META_SQLDB_PATH = join(dirname(__file__), 'data/meta_genomesearch.db')

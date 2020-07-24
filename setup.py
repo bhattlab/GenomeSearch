@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="genomesearch",
-    version='0.0.3_dev',
+    version='0.0.4_dev',
     description='A command line tool to quickly search for closely related microbial genomes using a marker-gene based approach.',
     url='https://github.com/bhattlab/GenomeSearch',
     author="Matt Durrant",
