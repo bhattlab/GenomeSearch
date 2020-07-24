@@ -38,7 +38,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     prodigal_end = time.time()
 
     marker_gene_start = time.time()
-    if fasta_type == 'proteome' or fasta_type == 'fasta':
+    if fasta_type == 'proteome' or fasta_type == 'genome':
         marker_output = join(outdir, prefix+'.markers.faa')
         click.echo("Identifying marker genes...")
         get_marker_genes(proteome_path, marker_output, prefix, threads)
@@ -86,7 +86,7 @@ def _meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
     prodigal_end = time.time()
 
     marker_gene_start = time.time()
-    if fasta_type == 'proteome' or fasta_type == 'fasta':
+    if fasta_type == 'proteome' or fasta_type == 'genome':
         marker_output = join(outdir, prefix+'.markers.faa')
         click.echo("Identifying marker genes...")
         get_marker_genes(proteome_path, marker_output, prefix, threads)
