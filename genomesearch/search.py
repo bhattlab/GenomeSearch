@@ -242,7 +242,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
             [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
              len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
-    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[7])))
 
     for res in closest_genomes:
         print(*res, sep='\t', file=outfile)
@@ -342,7 +342,7 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
             [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
              len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
-    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[6])))
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[7])))
 
     for res in closest_genomes:
         print(*res, sep='\t', file=outfile)
