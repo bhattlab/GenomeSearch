@@ -24,6 +24,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     if force and isdir(outdir):
         shutil.rmtree(outdir)
     try:
+        makedirs(outdir)
         makedirs(tmpdir)
     except FileExistsError:
         click.echo("Output directory exists, please delete or overwrite with --force")
@@ -72,6 +73,7 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
     if force and isdir(outdir):
         shutil.rmtree(outdir)
     try:
+        makedirs(outdir)
         makedirs(tmpdir)
     except FileExistsError:
         click.echo("Output directory exists, please delete or overwrite with --force")
