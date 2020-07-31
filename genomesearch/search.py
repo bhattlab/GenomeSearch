@@ -31,7 +31,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     prodigal_start = time.time()
     if fasta_type == 'genome':
         click.echo("Running prodigal...")
-        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, uhgg=False)
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
         proteome_path = join(tmpdir, 'prodigal.faa')
     elif fasta_type == 'proteome':
         proteome_path = fasta
@@ -79,7 +79,7 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
     prodigal_start = time.time()
     if fasta_type == 'genome':
         click.echo("Running prodigal...")
-        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, uhgg=False)
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
         proteome_path = join(tmpdir, 'prodigal.faa')
     elif fasta_type == 'proteome':
         proteome_path = fasta
