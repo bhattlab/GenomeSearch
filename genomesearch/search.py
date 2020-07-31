@@ -20,10 +20,7 @@ import pickle
 def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
-    print(outdir)
-    print(isdir(outdir))
-    print(force)
-    print(force and isdir(outdir))
+
     if force and isdir(outdir):
         shutil.rmtree(outdir)
     try:
