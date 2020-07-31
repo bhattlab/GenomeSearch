@@ -262,7 +262,7 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
     conn = sqlite3.connect(UHGG_SQLDB_PATH)
     c = conn.cursor()
 
-    c.execute("SELECT genome_id,taxon_id,species_rep,completeness,contamination,country,continent  FROM genome;")
+    c.execute("SELECT genome_id,genome_type,taxon_id,species_rep,completeness,contamination,country,continent  FROM genome;")
 
     genome2taxid = dict()
     for line in c.fetchall():
@@ -324,11 +324,11 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
 
     outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
 
-    print(*(['genome', 'species_rep', 'phylum', 'family', 'species', 'completeness', 'contamination', 'country', 'continent', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+    print(*(['genome', 'genome_type', 'species_rep', 'phylum', 'family', 'species', 'completeness', 'contamination', 'country', 'continent', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
           file=outfile)
     closest_genomes = []
     for genome in all_pident:
-        taxid, species_rep, completeness, contamination, country, continent = genome2taxid[genome]
+        genome_type, taxid, species_rep, completeness, contamination, country, continent = genome2taxid[genome]
 
         if len(all_pident[genome]) / float(total_markers) < 0.25:
             continue
@@ -341,11 +341,11 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
             except:
                 pidents.append(None)
         closest_genomes.append(
-            [genome, species_rep, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
+            [genome, genome_type, species_rep, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
              completeness, contamination, country, continent,
              len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
-    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[11])))
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[12])))
 
     for res in closest_genomes:
         print(*res, sep='\t', file=outfile)
