@@ -62,7 +62,7 @@ def _install(threads, force):
     select_markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
         pool.starmap(download_uhgg_unique_marker, select_markers)
-    click.echo("Finished downloading...")
+    click.echo("Finished installing...")
 
 
 def download_refbank_unique_marker(marker, force):
