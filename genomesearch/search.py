@@ -31,7 +31,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     prodigal_start = time.time()
     if fasta_type == 'genome':
         click.echo("Running prodigal...")
-        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, uhgg=False)
         proteome_path = join(tmpdir, 'prodigal.faa')
     elif fasta_type == 'proteome':
         proteome_path = fasta
@@ -65,7 +65,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     print("Gene count runtime: %f" % gene_count_time)
 
 
-def _meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -79,7 +79,7 @@ def _meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
     prodigal_start = time.time()
     if fasta_type == 'genome':
         click.echo("Running prodigal...")
-        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, meta=False)
+        run_prodigal(PRODIGAL_PATH, fasta, tmpdir, uhgg=False)
         proteome_path = join(tmpdir, 'prodigal.faa')
     elif fasta_type == 'proteome':
         proteome_path = fasta
@@ -95,7 +95,7 @@ def _meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
-    closest_genomes_path, gene_count_time, closest_genomes_time = get_meta_closest_genomes(
+    closest_genomes_path, gene_count_time, closest_genomes_time = get_uhgg_closest_genomes(
         marker_output, num_markers, tmpdir, threads, max_target_seqs
     )
 
@@ -254,9 +254,9 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
 
-def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
-    conn = sqlite3.connect(META_SQLDB_PATH)
+    conn = sqlite3.connect(UHGG_SQLDB_PATH)
     c = conn.cursor()
 
     c.execute("SELECT genome_id, taxon_id FROM genome;")
@@ -283,7 +283,7 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
         marker2path[marker] = os.path.join(split_markers_dir, marker + '.faa')
 
     markers = []
-    with open(META_MARKER_RANKS_PATH) as infile:
+    with open(UHGG_MARKER_RANKS_PATH) as infile:
         count = 0
         for line in infile:
             marker = line.strip()
@@ -295,7 +295,7 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
 
     args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
     with Pool(processes=threads) as pool:
-        pool.starmap(run_meta_unique_marker_search, args)
+        pool.starmap(run_uhgg_unique_marker_search, args)
 
     total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
@@ -307,7 +307,7 @@ def get_meta_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
         marker = os.path.basename(f1).split('.')[0]
         all_markers.add(marker)
 
-        seq_mapping = pickle.load(open(join(META_UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
+        seq_mapping = pickle.load(open(join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.pkl'), "rb"))
 
         with open(diamond_dir + '/' + marker + '.dmd.tsv') as infile:
             for line in infile:
@@ -365,8 +365,8 @@ def run_refbank_unique_marker_search(marker, split_markers_dir, diamond_dir, max
     run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
 
 
-def run_meta_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
-    db = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+def run_uhgg_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
+    db = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
     command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(

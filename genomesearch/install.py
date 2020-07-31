@@ -7,7 +7,7 @@ from multiprocessing import Pool
 from itertools import cycle
 
 
-def _download(threads, force):
+def _install(threads, force):
 
     click.echo("#### INPUT PARAMETERS ####")
     try:
@@ -28,12 +28,12 @@ def _download(threads, force):
         wget.download('https://storage.googleapis.com/genomesearch/downloads/refbank_genomesearch.db', REFBANK_SQLDB_PATH)
         click.echo()
 
-    if not isfile(META_SQLDB_PATH) or force:
-        if isfile(META_SQLDB_PATH):
-            remove(META_SQLDB_PATH)
-        click.echo("Downloading meta genomesearch SQL database...")
-        makedirs(dirname(META_SQLDB_PATH), exist_ok=True)
-        wget.download('https://storage.googleapis.com/genomesearch/downloads/meta_genomesearch.db', META_SQLDB_PATH)
+    if not isfile(UHGG_SQLDB_PATH) or force:
+        if isfile(UHGG_SQLDB_PATH):
+            remove(UHGG_SQLDB_PATH)
+        click.echo("Downloading uhgg genomesearch SQL database...")
+        makedirs(dirname(UHGG_SQLDB_PATH), exist_ok=True)
+        wget.download('https://storage.googleapis.com/genomesearch/downloads/uhgg_genomesearch.db', UHGG_SQLDB_PATH)
         click.echo()
 
     if not isfile(PHYLOPHLAN_MARKER_PATH) or force:
@@ -57,11 +57,11 @@ def _download(threads, force):
         pool.starmap(download_refbank_unique_marker, select_markers)
     click.echo("Finished downloading...")
 
-    click.echo("Downloading meta unique marker gene database...")
-    makedirs(META_UNIQUE_MARKERS_PATH, exist_ok=True)
+    click.echo("Downloading uhgg unique marker gene database...")
+    makedirs(UHGG_UNIQUE_MARKERS_PATH, exist_ok=True)
     select_markers = list(zip(markers[:num_markers], cycle([force])))
     with Pool(processes=threads) as pool:
-        pool.starmap(download_meta_unique_marker, select_markers)
+        pool.starmap(download_uhgg_unique_marker, select_markers)
     click.echo("Finished downloading...")
 
 
@@ -84,11 +84,11 @@ def download_refbank_unique_marker(marker, force):
         print()
 
 
-def download_meta_unique_marker(marker, force):
-    remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/meta_unique_markers/' + marker + '.unique.dmnd'
-    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/meta_unique_markers/' + marker + '.unique.pkl'
-    local_path_dmnd = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
-    local_path_pkl = join(META_UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
+def download_uhgg_unique_marker(marker, force):
+    remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/uhgg_unique_markers/' + marker + '.unique.dmnd'
+    remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/uhgg_unique_markers/' + marker + '.unique.pkl'
+    local_path_dmnd = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
+    local_path_pkl = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.pkl')
 
     if not isfile(local_path_dmnd) or force:
         if isfile(local_path_dmnd):
