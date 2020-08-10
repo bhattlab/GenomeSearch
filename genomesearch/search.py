@@ -432,11 +432,14 @@ def get_refbank_closest_genomes_meta(marker_genes_fasta, outdir, threads, max_ta
             if marker in marker2path:
                 markers.append(marker)
                 count += 1
+            if count == num_markers:
+                break
 
     args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
     with Pool(processes=threads) as pool:
         pool.starmap(run_refbank_unique_marker_search, args)
 
+    sys.exit()
     total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
     gene_count_start = time.time()
