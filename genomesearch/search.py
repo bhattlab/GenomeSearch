@@ -284,7 +284,7 @@ def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
     for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
         contig = '_'.join(rec.id.split('_')[:-1])
         if rec.id in gene2marker[contig]:
-            rec.id = gene2marker[contig][rec.id] + '__' + rec.id + '__' + prefix
+            rec.id = contig + '__' + gene2marker[contig][rec.id] + '__' + rec.id + '__' + prefix
             rec.description = rec.id
             records.append(rec)
 
