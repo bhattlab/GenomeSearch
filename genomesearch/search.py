@@ -388,6 +388,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
 
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
+
 def get_refbank_closest_genomes_meta(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
     conn = sqlite3.connect(REFBANK_SQLDB_PATH)
@@ -439,12 +440,11 @@ def get_refbank_closest_genomes_meta(marker_genes_fasta, num_markers, outdir, th
     with Pool(processes=threads) as pool:
         pool.starmap(run_refbank_unique_marker_search, args)
 
-    sys.exit()
     total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
     gene_count_start = time.time()
     all_markers = set()
-    all_pident = defaultdict(list)
+    all_pident =  defaultdict(lambda : defaultdict(dict))
     for f1 in glob(diamond_dir + '/*tsv'):
 
         marker = os.path.basename(f1).split('.')[0]
@@ -457,35 +457,34 @@ def get_refbank_closest_genomes_meta(marker_genes_fasta, num_markers, outdir, th
                 qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore = line.strip().split(
                     '\t')
                 pident, evalue = float(pident), float(evalue)
+                contig = qseqid.split('__')[0]
                 if evalue >= 1e-4:
                     continue
                 for genome in seq_mapping[sseqid]:
-                    all_pident[genome].append((marker, pident))
+                    all_pident[contig][genome].append((marker, pident))
 
     outfile = open(os.path.join(outdir, 'closest_genomes.tsv'), 'w')
 
-    print(*(['genome', 'taxon_id', 'phylum', 'family', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
+    print(*(['contig', 'genome', 'taxon_id', 'phylum', 'family', 'species', 'num_markers', 'total_markers', 'avg_pident'] + [marker for marker in all_markers]), sep='\t',
           file=outfile)
     closest_genomes = []
-    for genome in all_pident:
+    for contig in all_pident:
+        for genome in all_pident[contig]:
 
-        taxid = genome2taxid[int(genome)]
+            taxid = genome2taxid[int(genome)]
 
-        if len(all_pident[genome]) / float(total_markers) < 0.25:
-            continue
+            marker_pident = dict(all_pident[contig][genome])
+            pidents = []
+            for marker in all_markers:
+                try:
+                    pidents.append(marker_pident[marker])
+                except:
+                    pidents.append(None)
+            closest_genomes.append(
+                [contig, genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
+                 len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
 
-        marker_pident = dict(all_pident[genome])
-        pidents = []
-        for marker in all_markers:
-            try:
-                pidents.append(marker_pident[marker])
-            except:
-                pidents.append(None)
-        closest_genomes.append(
-            [genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
-             len(all_pident[genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
-
-    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[7])))
+    closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: x[8])))
 
     for res in closest_genomes:
         print(*res, sep='\t', file=outfile)
