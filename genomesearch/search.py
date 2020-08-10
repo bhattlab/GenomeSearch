@@ -273,6 +273,7 @@ def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
                 if finding[-1] > top_markers[contig][marker][-1]:
                     top_markers[contig][marker] = finding
 
+    print(top_markers)
     marker2gene = defaultdict(lambda : defaultdict(dict))
     gene2marker = defaultdict(lambda : defaultdict(dict))
     for contig in top_markers:
