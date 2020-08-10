@@ -84,8 +84,6 @@ def _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target
         click.echo("Running prodigal...")
         run_prodigal_multithread(PRODIGAL_PATH, fasta, tmpdir, threads)
         proteome_path = join(tmpdir, 'prodigal.faa')
-        print(proteome_path)
-        sys.exit()
     elif fasta_type == 'proteome':
         proteome_path = fasta
     prodigal_end = time.time()
@@ -94,9 +92,11 @@ def _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target
     if fasta_type == 'proteome' or fasta_type == 'genome':
         marker_output = join(outdir, prefix+'.markers.faa')
         click.echo("Identifying marker genes...")
-        get_marker_genes(proteome_path, marker_output, prefix, threads)
-    elif fasta_type == 'markers':
-        marker_output = fasta
+        get_marker_genes_meta(proteome_path, marker_output, prefix, threads)
+    else:
+        print("With --meta flag, only genomes and proteomes are allowed as inputs.")
+        sys.exit()
+
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
@@ -224,6 +224,67 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
     SeqIO.write(records, outfile, 'fasta')
     #os.remove(outfile+'.dmd.tsv')
+
+
+def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
+
+    command = '{0} blastp --query {1} --out {2}.dmd.tsv --outfmt 6 qseqid sseqid qlen slen pident length mismatch gapopen qstart qend sstart send evalue bitscore --db {3} --threads {4}'.format(
+        DIAMOND_PATH, protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads)
+    print('diamond command:', command)
+
+    run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
+
+    sys.exit()
+    top_markers = defaultdict(lambda : defaultdict(dict))
+    with open(outfile + '.dmd.tsv') as infile:
+        for line in infile:
+            qseqid, sseqid, qlen, slen, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore = line.strip().split('\t')
+            qlen, slen, qstart, qend, sstart, send = int(qlen), int(slen), int(qstart), int(qend), int(sstart), int(send)
+            length, evalue, bitscore = int(length), float(evalue), float(bitscore)
+            finding = (qseqid, length, evalue, bitscore)
+            marker = sseqid.split('_')[1]
+
+            qaln = qend - qstart
+            saln = send - sstart
+
+            query_smaller = True
+            if slen > qlen:
+                query_smaller = False
+
+            if finding[-2] >= 1e-6:
+                continue
+
+            if min([qlen, slen]) / max([qlen, slen]) < 0.85:
+                continue
+
+            if query_smaller:
+                alnlength = qaln
+            else:
+                alnlength = saln
+
+            if alnlength / min([qlen, slen]) < 0.85:
+                continue
+
+            if marker not in top_markers:
+                top_markers[marker] = finding
+            else:
+                if finding[-1] > top_markers[marker][-1]:
+                    top_markers[marker] = finding
+
+    marker2gene = dict()
+    gene2marker = dict()
+    for rec in top_markers:
+        marker2gene[rec] = top_markers[rec][0]
+        gene2marker[top_markers[rec][0]] = rec
+
+    records = []
+    for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
+        if rec.id in gene2marker:
+            rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + prefix
+            rec.description = rec.id
+            records.append(rec)
+
+    SeqIO.write(records, outfile, 'fasta')
 
 
 def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
