@@ -4,7 +4,7 @@ import shutil
 import click
 import sys
 import os
-from genomesearch.prodigal import run_prodigal
+from genomesearch.prodigal import run_prodigal, run_prodigal_multithread
 from genomesearch import *
 from Bio import SeqIO
 from subprocess import run, DEVNULL
@@ -66,6 +66,56 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     print("Closest genome runtime: %f" % closest_genomes_time)
     print("Gene count runtime: %f" % gene_count_time)
 
+def _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+
+    tmpdir = join(outdir, 'tmp')
+
+    if force and isdir(outdir):
+        shutil.rmtree(outdir)
+    try:
+        makedirs(outdir)
+        makedirs(tmpdir)
+    except FileExistsError:
+        click.echo("Output directory exists, please delete or overwrite with --force")
+        sys.exit(1)
+
+    prodigal_start = time.time()
+    if fasta_type == 'genome':
+        click.echo("Running prodigal...")
+        run_prodigal_multithread(PRODIGAL_PATH, fasta, tmpdir, threads)
+        proteome_path = join(tmpdir, 'prodigal.faa')
+        print(proteome_path)
+        sys.exit()
+    elif fasta_type == 'proteome':
+        proteome_path = fasta
+    prodigal_end = time.time()
+
+    marker_gene_start = time.time()
+    if fasta_type == 'proteome' or fasta_type == 'genome':
+        marker_output = join(outdir, prefix+'.markers.faa')
+        click.echo("Identifying marker genes...")
+        get_marker_genes(proteome_path, marker_output, prefix, threads)
+    elif fasta_type == 'markers':
+        marker_output = fasta
+    marker_gene_end = time.time()
+
+    click.echo("Searching for closest genomes in database...")
+    closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes(
+        marker_output, num_markers, tmpdir, threads, max_target_seqs
+    )
+
+    outpath = join(outdir, prefix+'.closest_genomes.tsv')
+    shutil.move(closest_genomes_path, outpath)
+
+    if not keep_intermediate:
+        shutil.rmtree(tmpdir)
+
+    print()
+    print("COMPLETE.")
+    print("Prodigal runtime: %f" % (prodigal_end-prodigal_start))
+    print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
+    print("Closest genome runtime: %f" % closest_genomes_time)
+    print("Gene count runtime: %f" % gene_count_time)
 
 def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
 
@@ -117,7 +167,7 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
 
 
 def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
-    command = '{0} blastp --query {1} --out {2}.dmd.tsv --outfmt 6 --db {3} --threads {4}'.format(
+    command = '{0} blastp --query {1} --out {2}.dmd.tsv --outfmt 6 qseqid sseqid qlen slen pident length mismatch gapopen qstart qend sstart send evalue bitscore --db {3} --threads {4}'.format(
         DIAMOND_PATH, protein_fasta_path, outfile, PHYLOPHLAN_MARKER_PATH, threads)
     print('diamond command:', command)
 
@@ -126,12 +176,31 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
     top_markers = dict()
     with open(outfile + '.dmd.tsv') as infile:
         for line in infile:
-            qseqid, sseqid, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore =  line.strip().split('\t')
+            qseqid, sseqid, qlen, slen, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore =  line.strip().split('\t')
+            qlen, slen, qstart, qend, sstart, send = int(qlen), int(slen), int(qstart), int(qend), int(sstart), int(send)
             length, evalue, bitscore = int(length), float(evalue), float(bitscore)
             finding = (qseqid, length, evalue, bitscore)
             marker = sseqid.split('_')[1]
 
-            if finding[-2] >= 1e-4:
+            qaln = qend - qstart
+            saln = send - sstart
+
+            query_smaller = True
+            if slen > qlen:
+                query_smaller = False
+
+            if finding[-2] >= 1e-6:
+                continue
+
+            if min([qlen, slen]) / max([qlen, slen]) < 0.85:
+                continue
+
+            if query_smaller:
+                alnlength = qaln
+            else:
+                alnlength = saln
+
+            if alnlength / min([qlen, slen]) < 0.85:
                 continue
 
             if marker not in top_markers:

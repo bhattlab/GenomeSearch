@@ -1,7 +1,7 @@
 import click
 from genomesearch import *
 from genomesearch.help import CustomHelp
-from genomesearch.search import _refbank, _uhgg
+from genomesearch.search import _refbank, _refbank_meta, _uhgg
 from genomesearch.install import _install
 
 @click.group(cls=CustomHelp)
@@ -26,12 +26,19 @@ def install(threads, force):
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
 @click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
+@click.option('--meta/--isolate', default=False, help="Running this in a metagenomic vs. an isolate assembly.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, meta, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
-               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
-    _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type=fasta_type)
+               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, meta=meta, fasta_type=fasta_type)
+
+    if not meta:
+        _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate,
+                 fasta_type=fasta_type)
+    else:
+        _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate,
+                 fasta_type=fasta_type)
 
 
 @cli.command(short_help='Run genomesearch on a complete or draft sequence of a single species against the Unified Human Gastrointestinal Genome (UHGG) collection.', help_priority=1)
