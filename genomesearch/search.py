@@ -99,7 +99,7 @@ def _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes_meta(
-        marker_output, tmpdir, threads, max_target_seqs
+        marker_output, num_markers, tmpdir, threads, max_target_seqs
     )
 
     outpath = join(outdir, prefix+'.closest_genomes.tsv')
@@ -388,7 +388,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
 
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
-def get_refbank_closest_genomes_meta(marker_genes_fasta, outdir, threads, max_target_seqs):
+def get_refbank_closest_genomes_meta(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
     closest_genomes_start = time.time()
     conn = sqlite3.connect(REFBANK_SQLDB_PATH)
     c = conn.cursor()
