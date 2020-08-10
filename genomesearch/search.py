@@ -273,13 +273,13 @@ def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
                 if finding[-1] > top_markers[contig][marker][-1]:
                     top_markers[contig][marker] = finding
 
-    print(top_markers)
+
     marker2gene = defaultdict(lambda : defaultdict(dict))
     gene2marker = defaultdict(lambda : defaultdict(dict))
     for contig in top_markers:
         for rec in top_markers[contig]:
             marker2gene[contig][rec] = top_markers[contig][rec][0]
-            gene2marker[top_markers[contig][rec][0]] = rec
+            gene2marker[contig][top_markers[contig][rec][0]] = rec
 
     records = []
     for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
