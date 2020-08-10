@@ -97,6 +97,7 @@ def _refbank_meta(fasta, num_markers, outdir, prefix, force, threads, max_target
         print("With --meta flag, only genomes and proteomes are allowed as inputs.")
         sys.exit()
 
+    sys.exit()
     marker_gene_end = time.time()
 
     click.echo("Searching for closest genomes in database...")
@@ -234,11 +235,12 @@ def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
 
     run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
 
-    sys.exit()
     top_markers = defaultdict(lambda : defaultdict(dict))
     with open(outfile + '.dmd.tsv') as infile:
         for line in infile:
             qseqid, sseqid, qlen, slen, pident, length, mismatch, gapopen, qstart, qend, sstart, send, evalue, bitscore = line.strip().split('\t')
+
+            contig = '_'.join(qseqid.split('_')[:-1])
             qlen, slen, qstart, qend, sstart, send = int(qlen), int(slen), int(qstart), int(qend), int(sstart), int(send)
             length, evalue, bitscore = int(length), float(evalue), float(bitscore)
             finding = (qseqid, length, evalue, bitscore)
@@ -266,21 +268,23 @@ def get_marker_genes_meta(protein_fasta_path, outfile, prefix, threads):
                 continue
 
             if marker not in top_markers:
-                top_markers[marker] = finding
+                top_markers[contig][marker] = finding
             else:
                 if finding[-1] > top_markers[marker][-1]:
-                    top_markers[marker] = finding
+                    top_markers[contig][marker] = finding
 
-    marker2gene = dict()
-    gene2marker = dict()
-    for rec in top_markers:
-        marker2gene[rec] = top_markers[rec][0]
-        gene2marker[top_markers[rec][0]] = rec
+    marker2gene = defaultdict(lambda : defaultdict(dict))
+    gene2marker = defaultdict(lambda : defaultdict(dict))
+    for contig in top_markers:
+        for rec in top_markers[contig]:
+            marker2gene[contig][rec] = top_markers[contig][rec][0]
+            gene2marker[top_markers[contig][rec][0]] = rec
 
     records = []
     for rec in SeqIO.parse(protein_fasta_path, 'fasta'):
-        if rec.id in gene2marker:
-            rec.id = gene2marker[rec.id] + '__' + rec.id + '__' + prefix
+        contig = '_'.join(rec.id.split('_')[:-1])
+        if rec.id in gene2marker[contig]:
+            rec.id = gene2marker[contig][rec.id] + '__' + rec.id + '__' + prefix
             rec.description = rec.id
             records.append(rec)
 
