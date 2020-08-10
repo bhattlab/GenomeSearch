@@ -444,7 +444,7 @@ def get_refbank_closest_genomes_meta(marker_genes_fasta, num_markers, outdir, th
     closest_genomes_end = time.time()
     gene_count_start = time.time()
     all_markers = set()
-    all_pident =  defaultdict(lambda : defaultdict(dict))
+    all_pident =  defaultdict(lambda : defaultdict(list))
     for f1 in glob(diamond_dir + '/*tsv'):
 
         marker = os.path.basename(f1).split('.')[0]
