@@ -373,7 +373,7 @@ def run_refbank_unique_marker_search(marker, split_markers_dir, diamond_dir, max
     db = join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4} --id {5}'.format(
+    command = '{0} blastp -k {1} --id {5} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
         DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
         os.path.join(diamond_dir, marker), db, min_percent_identity)
     print('diamond command:', command)
@@ -383,7 +383,7 @@ def run_uhgg_unique_marker_search(marker, split_markers_dir, diamond_dir, max_ta
     db = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4} --id {5}'.format(
+    command = '{0} blastp -k {1} --id {5} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
         DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
         os.path.join(diamond_dir, marker), db, min_percent_identity)
     print('diamond command:', command)

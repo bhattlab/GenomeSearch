@@ -153,10 +153,15 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
     os.makedirs(split_markers_dir, exist_ok=True)
     os.makedirs(diamond_dir, exist_ok=True)
 
+    contig_total_markers = defaultdict(set)
     marker2path = dict()
     splitmarkers = dict()
     for rec in SeqIO.parse(marker_genes_fasta, 'fasta'):
+        contig = rec.id.split('__')[0]
         marker = rec.id.split('__')[1]
+
+        contig_total_markers[contig].add(marker)
+
         if marker not in splitmarkers:
             splitmarkers[marker] =  open(os.path.join(split_markers_dir, marker + '.faa'), 'w')
 
@@ -182,7 +187,6 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
     with Pool(processes=threads) as pool:
         pool.starmap(run_refbank_unique_marker_search, args)
 
-    total_markers = len(glob(diamond_dir + '/*tsv'))
     closest_genomes_end = time.time()
     gene_count_start = time.time()
     all_markers = set()
@@ -224,7 +228,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
                     pidents.append(None)
             closest_genomes.append(
                 [contig, genome, taxid, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
-                 len(all_pident[contig][genome]), total_markers, np.mean(list(marker_pident.values()))] + pidents)
+                 len(all_pident[contig][genome]), contig_total_markers[contig], np.mean(list(marker_pident.values()))] + pidents)
 
     closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: (x[0], x[8]))))
 
