@@ -4,7 +4,7 @@ from genomesearch.help import CustomHelp
 from genomesearch.isolate import _refbank as isolate_refbank
 from genomesearch.isolate import _uhgg as isolate_uhgg
 from genomesearch.meta import _refbank as meta_refbank
-from genomesearch.meta import _refbank as meta_uhgg
+from genomesearch.meta import _uhgg as meta_uhgg
 
 from genomesearch.install import _install
 
