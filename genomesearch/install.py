@@ -85,6 +85,8 @@ def download_refbank_unique_marker(marker, force):
 
 
 def download_uhgg_unique_marker(marker, force):
+    print(marker, force)
+
     remote_path_dmnd = 'https://storage.googleapis.com/genomesearch/downloads/uhgg_unique_markers/' + marker + '.unique.dmnd'
     remote_path_pkl = 'https://storage.googleapis.com/genomesearch/downloads/uhgg_unique_markers/' + marker + '.unique.pkl'
     local_path_dmnd = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
