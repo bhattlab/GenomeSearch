@@ -386,7 +386,7 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
             closest_genomes.append(
                 [contig, genome, genome_type, species_rep, taxon2species[taxid][0], taxon2species[taxid][1], taxon2species[taxid][2],
                  completeness, contamination, country, continent,
-                 len(all_pident[genome]), len(contig_total_markers[contig]), np.mean(list(marker_pident.values()))] + pidents)
+                 len(all_pident[contig][genome]), len(contig_total_markers[contig]), np.mean(list(marker_pident.values()))] + pidents)
 
     closest_genomes = list(reversed(sorted(closest_genomes, key=lambda x: (x[0], x[13]))))
 
