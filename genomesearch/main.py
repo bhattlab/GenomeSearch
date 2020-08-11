@@ -9,7 +9,7 @@ def cli():
     """A command line tool to quickly search for closely related microbial genomes using a marker-gene based approach."""
     pass
 
-@cli.command(short_help='Download the GenomeSearch database', help_priority=1)
+@cli.command(short_help='Download the GenomeSearch database')
 @click.option('--threads', '-t', default=10)
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 def install(threads, force):
@@ -17,7 +17,7 @@ def install(threads, force):
     _install(threads, force)
 
 
-@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
@@ -45,21 +45,21 @@ def isolate(ctx, fasta, num_markers, outdir, prefix, force, threads, max_target_
         'fasta_type': fasta_type
     }
 
-@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.pass_context
 def refbank(ctx):
     """A click access point for the run module. This is used for creating the command line interface."""
     print(ctx)
 
 
-@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.pass_context
 def uhgg(ctx):
     """A click access point for the run module. This is used for creating the command line interface."""
     print(ctx)
 
 
-@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
@@ -87,14 +87,14 @@ def meta(ctx, fasta, num_markers, outdir, prefix, force, threads, max_target_seq
         'fasta_type': fasta_type
     }
 
-@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.pass_context
 def refbank(ctx):
     """A click access point for the run module. This is used for creating the command line interface."""
     print(ctx)
 
 
-@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
 @click.pass_context
 def uhgg(ctx):
     """A click access point for the run module. This is used for creating the command line interface."""
