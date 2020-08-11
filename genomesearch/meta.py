@@ -82,7 +82,7 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, m
     prodigal_start = time.time()
     if fasta_type == 'genome':
         click.echo("Running prodigal...")
-        run_prodigal_multithread(PRODIGAL_PATH, fasta, tmpdir)
+        run_prodigal_multithread(PRODIGAL_PATH, fasta, tmpdir, threads)
         proteome_path = join(tmpdir, 'prodigal.faa')
     elif fasta_type == 'proteome':
         proteome_path = fasta
