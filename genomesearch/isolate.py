@@ -16,7 +16,7 @@ import time
 from multiprocessing import Pool
 import pickle
 
-def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
 
@@ -49,7 +49,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes(
-        marker_output, num_markers, tmpdir, threads, max_target_seqs
+        marker_output, num_markers, tmpdir, threads, max_target_seqs, min_percent_identity
     )
 
     outpath = join(outdir, prefix+'.closest_genomes.tsv')
@@ -65,7 +65,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     print("Closest genome runtime: %f" % closest_genomes_time)
     print("Gene count runtime: %f" % gene_count_time)
 
-def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -97,7 +97,7 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, k
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_uhgg_closest_genomes(
-        marker_output, num_markers, tmpdir, threads, max_target_seqs
+        marker_output, num_markers, tmpdir, threads, max_target_seqs, min_percent_identity
     )
 
     outpath = join(outdir, prefix+'.closest_genomes.tsv')
@@ -171,7 +171,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
     SeqIO.write(records, outfile, 'fasta')
 
-def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs, min_percent_identity):
     closest_genomes_start = time.time()
     conn = sqlite3.connect(REFBANK_SQLDB_PATH)
     c = conn.cursor()
@@ -210,7 +210,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
             if count == num_markers:
                 break
 
-    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
+    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs, min_percent_identity) for marker in markers]
     with Pool(processes=threads) as pool:
         pool.starmap(run_refbank_unique_marker_search, args)
 
@@ -270,7 +270,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
 
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
-def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs, min_percent_identity):
     closest_genomes_start = time.time()
     conn = sqlite3.connect(UHGG_SQLDB_PATH)
     c = conn.cursor()
@@ -309,7 +309,7 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
             if count == num_markers:
                 break
 
-    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
+    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs, min_percent_identity) for marker in markers]
     with Pool(processes=threads) as pool:
         pool.starmap(run_uhgg_unique_marker_search, args)
 
@@ -369,22 +369,22 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
 
     return os.path.join(outdir, 'closest_genomes.tsv'), gene_count_end - gene_count_start, closest_genomes_end - closest_genomes_start
 
-def run_refbank_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
+def run_refbank_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs, min_percent_identity):
     db = join(REFBANK_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
+    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4} --id {5}'.format(
         DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
-        os.path.join(diamond_dir, marker), db)
+        os.path.join(diamond_dir, marker), db, min_percent_identity)
     print('diamond command:', command)
     run(command.split(), stdout=DEVNULL, stderr=DEVNULL)
 
-def run_uhgg_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs):
+def run_uhgg_unique_marker_search(marker, split_markers_dir, diamond_dir, max_target_seqs, min_percent_identity):
     db = join(UHGG_UNIQUE_MARKERS_PATH, marker + '.unique.dmnd')
     marker = os.path.basename(db).split('.')[0]
 
-    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4}'.format(
+    command = '{0} blastp -k {1} --query {2} --out {3}.dmd.tsv --outfmt 6 --db {4} --id {5}'.format(
         DIAMOND_PATH, max_target_seqs, os.path.join(split_markers_dir, marker + '.faa'),
-        os.path.join(diamond_dir, marker), db)
+        os.path.join(diamond_dir, marker), db, min_percent_identity)
     print('diamond command:', command)
     run(command.split(), stdout=DEVNULL, stderr=DEVNULL)

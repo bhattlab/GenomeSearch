@@ -18,7 +18,7 @@ from multiprocessing import Pool
 import pickle
 
 
-def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
 
     tmpdir = join(outdir, 'tmp')
 
@@ -51,7 +51,7 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes(
-        marker_output, num_markers, tmpdir, threads, max_target_seqs
+        marker_output, num_markers, tmpdir, threads, max_target_seqs, min_percent_identity
     )
 
     outpath = join(outdir, prefix+'.closest_genomes.tsv')
@@ -66,7 +66,6 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
     print("Closest genome runtime: %f" % closest_genomes_time)
     print("Gene count runtime: %f" % gene_count_time)
-
 
 def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
@@ -132,8 +131,7 @@ def get_marker_genes(protein_fasta_path, outfile, prefix, threads):
 
     SeqIO.write(records, outfile, 'fasta')
 
-
-def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs):
+def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, max_target_seqs, min_percent_identity):
     closest_genomes_start = time.time()
     conn = sqlite3.connect(REFBANK_SQLDB_PATH)
     c = conn.cursor()
@@ -180,7 +178,7 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
             if count == num_markers:
                 break
 
-    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs) for marker in markers]
+    args = [(marker, split_markers_dir, diamond_dir, max_target_seqs, min_percent_identity) for marker in markers]
     with Pool(processes=threads) as pool:
         pool.starmap(run_refbank_unique_marker_search, args)
 
