@@ -60,8 +60,6 @@ def _install(threads, force):
     click.echo("Downloading uhgg unique marker gene database...")
     makedirs(UHGG_UNIQUE_MARKERS_PATH, exist_ok=True)
     select_markers = list(zip(markers[:num_markers], cycle([force])))
-    print(select_markers[select_markers.index(('p0337', False)):])
-    sys.exit()
     with Pool(processes=threads) as pool:
         pool.starmap(download_uhgg_unique_marker, select_markers)
     click.echo("Finished installing...")
