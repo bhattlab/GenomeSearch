@@ -53,6 +53,7 @@ def _install(threads, force):
     click.echo("Downloading refbank unique marker gene database...")
     makedirs(REFBANK_UNIQUE_MARKERS_PATH, exist_ok=True)
     select_markers = list(zip(markers[:num_markers], cycle([force])))
+    print(select_markers)
     with Pool(processes=threads) as pool:
         pool.starmap(download_refbank_unique_marker, select_markers)
     click.echo("Finished downloading...")
