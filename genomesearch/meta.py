@@ -221,10 +221,10 @@ def get_refbank_closest_genomes(marker_genes_fasta, num_markers, outdir, threads
         splitmarkers[marker].close()
 
     markers = []
-    with open(REFBANK_MARKER_RANKS_PATH) as infile:
+    with open(REFBANK_MARKER_RANKS_ONE_PATH) as infile:
         count = 0
         for line in infile:
-            marker = line.strip()
+            marker = line.strip().split()[0]
             if marker in marker2path:
                 markers.append(marker)
                 count += 1
@@ -331,10 +331,10 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
         splitmarkers[marker].close()
 
     markers = []
-    with open(UHGG_MARKER_RANKS_PATH) as infile:
+    with open(UHGG_MARKER_RANKS_ONEZERO_PATH) as infile:
         count = 0
         for line in infile:
-            marker = line.strip()
+            marker = line.strip().split()[0]
             if marker in marker2path:
                 markers.append(marker)
                 count += 1
