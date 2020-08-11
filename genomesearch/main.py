@@ -42,6 +42,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 
 
 @isolate.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
+@click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_isolate_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
@@ -63,6 +64,7 @@ def meta():
     pass
 
 @meta.command(short_help='Run genomesearch meta on the RefSeq/GenBank (RefBank) database.')
+@click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_meta_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
@@ -78,6 +80,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 
 
 @meta.command(short_help='Run genomesearch meta on the Unified Human Gastrointestinal Genome (UHGG) database.')
+@click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_meta_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
