@@ -17,7 +17,7 @@ def install(threads, force):
     _install(threads, force)
 
 
-@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
+@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single isolate.')
 def isolate():
     """A click access point for the run module. This is used for creating the command line interface."""
     pass
@@ -53,7 +53,7 @@ def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, ke
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
 
-@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
+@cli.group(short_help='Run genomesearch on a metagenomic assembly with multiple unbinned organisms.')
 def meta():
     """A click access point for the run module. This is used for creating the command line interface."""
     pass
@@ -73,7 +73,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
 
-@meta.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
+@meta.command(short_help='Run genomesearch meta on the Unified Human Gastrointestinal Genome (UHGG) database.')
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
