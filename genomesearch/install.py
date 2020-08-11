@@ -47,7 +47,7 @@ def _install(threads, force):
     markers = []
     with open(REFBANK_MARKER_RANKS_ONEZERO_PATH) as infile:
         for line in infile:
-            marker = line.strip()
+            marker = line.strip().split()[0]
             markers.append(marker)
 
     click.echo("Downloading refbank unique marker gene database...")
@@ -61,7 +61,7 @@ def _install(threads, force):
     markers = []
     with open(UHGG_MARKER_RANKS_ONEZERO_PATH) as infile:
         for line in infile:
-            marker = line.strip()
+            marker = line.strip().split()[0]
             markers.append(marker)
 
     click.echo("Downloading uhgg unique marker gene database...")
