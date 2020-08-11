@@ -34,6 +34,6 @@ If you want to perform a metagenomic search against refbank, use:
     
 And if you want to perform a metagenomic search against uhgg, use:
 
-    genomesearch meta uhgg <myIsolate.fna>
+    genomesearch meta uhgg <myMetagenome.fna>
 
 # Citation
