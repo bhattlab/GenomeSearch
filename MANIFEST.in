@@ -1,4 +1,6 @@
-include genomesearch/data/uhgg_marker_ranks.txt
-include genomesearch/data/refbank_marker_ranks.txt
+include genomesearch/data/refbank_markers_one.tsv
+include genomesearch/data/refbank_markers_onezero.tsv
+include genomesearch/data/uhgg_markers_one.tsv
+include genomesearch/data/uhgg_markers_onezero.tsv
 include genomesearch/bin/prodigal.linux
 include genomesearch/bin/diamond
