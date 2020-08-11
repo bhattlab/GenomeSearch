@@ -376,9 +376,6 @@ def get_uhgg_closest_genomes(marker_genes_fasta, num_markers, outdir, threads, m
         for genome in all_pident[contig]:
             genome_type, taxid, species_rep, completeness, contamination, country, continent = genome2taxid[genome]
 
-            if len(all_pident[genome]) / float(total_markers) < 0.25:
-                continue
-
             marker_pident = dict(all_pident[contig][genome])
             pidents = []
             for marker in all_markers:
