@@ -18,6 +18,11 @@ def install(threads, force):
 
 
 @cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
+def isolate():
+    """A click access point for the run module. This is used for creating the command line interface."""
+    pass
+
+@isolate.command(short_help='Run genomesearch isolate on the RefSeq/GenBank (RefBank) database.')
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
@@ -27,40 +32,33 @@ def install(threads, force):
 @click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-@click.pass_context
-def isolate(ctx, fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
-    ctx.obj = {
-        'fasta': fasta,
-        'num_markers': num_markers,
-        'outdir': outdir,
-        'prefix': prefix,
-        'force': force,
-        'threads': threads,
-        'max_target_seqs': max_target_seqs,
-        'keep_intermediate': keep_intermediate,
-        'fasta_type': fasta_type
-    }
 
-@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
-@click.pass_context
-def refbank(ctx):
+@isolate.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
+@click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
+@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
+@click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
+@click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
+@click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
+@click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
+@click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
+def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
-    print(ctx)
-
-
-@isolate.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
-@click.pass_context
-def uhgg(ctx):
-    """A click access point for the run module. This is used for creating the command line interface."""
-    print(ctx)
+    log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
+               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
 
 @cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
-@click.argument('fasta', type=click.Path(exists=True))
+def meta():
+    """A click access point for the run module. This is used for creating the command line interface."""
+    pass
+
+@meta.command(short_help='Run genomesearch meta on the RefSeq/GenBank (RefBank) database.')
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
@@ -69,36 +67,25 @@ def uhgg(ctx):
 @click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-@click.pass_context
-def meta(ctx, fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
+def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
-    ctx.obj = {
-        'fasta': fasta,
-        'num_markers': num_markers,
-        'outdir': outdir,
-        'prefix': prefix,
-        'force': force,
-        'threads': threads,
-        'max_target_seqs': max_target_seqs,
-        'keep_intermediate': keep_intermediate,
-        'fasta_type': fasta_type
-    }
 
-@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
-@click.pass_context
-def refbank(ctx):
+@meta.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
+@click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
+@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
+@click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
+@click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
+@click.option('--max-target-seqs', '-k', default=200, help="The maximum number of target seqs returned by the diamond search.")
+@click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
+@click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
+def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type):
     """A click access point for the run module. This is used for creating the command line interface."""
-    print(ctx)
-
-
-@meta.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.')
-@click.pass_context
-def uhgg(ctx):
-    """A click access point for the run module. This is used for creating the command line interface."""
-    print(ctx)
+    log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
+               max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
 
 def log_params(**kwargs):
     click.echo("#### PARAMETERS ####")
