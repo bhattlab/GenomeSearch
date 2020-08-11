@@ -1,7 +1,8 @@
 import click
 from genomesearch import *
 from genomesearch.help import CustomHelp
-from genomesearch.search import _refbank, _refbank_meta, _uhgg
+from genomesearch import isolate
+from genomesearch import meta
 from genomesearch.install import _install
 
 @click.group(cls=CustomHelp)
@@ -36,6 +37,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
+    isolate._refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type)
 
 
 @isolate.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
@@ -51,9 +53,10 @@ def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, ke
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
+    isolate._refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type)
 
 
-@cli.group(short_help='Run genomesearch on a metagenomic assembly with multiple unbinned organisms.')
+@cli.group(short_help='Run genomesearch on a metagenomic assembly with multiple unbinned sequences.')
 def meta():
     """A click access point for the run module. This is used for creating the command line interface."""
     pass
