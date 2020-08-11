@@ -45,7 +45,7 @@ def _install(threads, force):
         click.echo()
 
     markers = []
-    with open(REFBANK_MARKER_RANKS_PATH) as infile:
+    with open(REFBANK_MARKER_RANKS_ONEZERO_PATH) as infile:
         for line in infile:
             marker = line.strip()
             markers.append(marker)
@@ -56,6 +56,12 @@ def _install(threads, force):
     with Pool(processes=threads) as pool:
         pool.starmap(download_refbank_unique_marker, select_markers)
     click.echo("Finished downloading...")
+
+    markers = []
+    with open(UHGG_MARKER_RANKS_ONEZERO_PATH) as infile:
+        for line in infile:
+            marker = line.strip()
+            markers.append(marker)
 
     click.echo("Downloading uhgg unique marker gene database...")
     makedirs(UHGG_UNIQUE_MARKERS_PATH, exist_ok=True)
