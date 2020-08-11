@@ -37,3 +37,4 @@ And if you want to perform a metagenomic search against uhgg, use:
     genomesearch meta uhgg <myMetagenome.fna>
 
 # Citation
+This program is unpublished and has not been peer-reviewed. If you wish to cite the program, please contact submit an [issue](https://github.com/bhattlab/GenomeSearch/issues) and we will help you.
