@@ -4,6 +4,8 @@ A command line tool to quickly identify closely related genomes using a marker-g
 # About
 ~500,000 RefSeq/GenBank (RefBank) and ~280,000 Unified Human Gastrointestinal Genome (UHGG) were downloaded and analyzed to identify [phylophlan](https://huttenhower.sph.harvard.edu/phylophlan/) marker genes. These marker genes are stored in a database and all mapped back to the original genome. Given a query genome, *GenomeSearch* extracts marker genes from the query genome and searches against the selected database to quickly identify closely related genomes. This can also be run in `meta` mode where each contig in the FASTA file is treated independently.
 
+This tool has advantages to other approaches, such as kmer-based classification systems, because it doesn't need to load a massive index into memory, and it doesn't depend on external taxonomic classifications. It's pretty fast, too!
+
 # Installation
 
 Just type in 
@@ -37,4 +39,4 @@ And if you want to perform a metagenomic search against uhgg, use:
     genomesearch meta uhgg <myMetagenome.fna>
 
 # Citation
-This program is unpublished and has not been peer-reviewed. If you wish to cite the program, please contact submit an [issue](https://github.com/bhattlab/GenomeSearch/issues) and we will help you.
+This program is unpublished and has not been peer-reviewed. If you wish to cite the program, please submit an [issue](https://github.com/bhattlab/GenomeSearch/issues) and we will help you.
