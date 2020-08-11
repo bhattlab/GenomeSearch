@@ -3,6 +3,7 @@ from genomesearch import *
 from genomesearch.help import CustomHelp
 from genomesearch.isolate import _refbank as isolate_refbank
 from genomesearch.isolate import _uhgg as isolate_uhgg
+from genomesearch.meta import _refbank as meta_refbank
 
 from genomesearch.install import _install
 
@@ -77,7 +78,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
-
+    meta_refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, keep_intermediate, fasta_type)
 
 @meta.command(short_help='Run genomesearch meta on the Unified Human Gastrointestinal Genome (UHGG) database.')
 @click.argument('fasta', type=click.Path(exists=True))
