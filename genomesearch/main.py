@@ -17,7 +17,7 @@ def install(threads, force):
     _install(threads, force)
 
 
-@cli.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
@@ -59,7 +59,7 @@ def uhgg(ctx):
     print(ctx)
 
 
-@cli.command(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
+@cli.group(short_help='Run genomesearch on a complete or draft sequence of a single species against refseq/genbank genomes.', help_priority=1)
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
 @click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
