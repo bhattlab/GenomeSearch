@@ -26,7 +26,7 @@ def isolate():
 @isolate.command(short_help='Run genomesearch isolate on the RefSeq/GenBank (RefBank) database.')
 @click.argument('fasta', type=click.Path(exists=True))
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
-@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--outdir', '-o', default='genomesearch_isolate_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
@@ -42,7 +42,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 
 @isolate.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
-@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--outdir', '-o', default='genomesearch_isolate_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
@@ -63,7 +63,7 @@ def meta():
 
 @meta.command(short_help='Run genomesearch meta on the RefSeq/GenBank (RefBank) database.')
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
-@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--outdir', '-o', default='genomesearch_meta_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
@@ -78,7 +78,7 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 
 @meta.command(short_help='Run genomesearch meta on the Unified Human Gastrointestinal Genome (UHGG) database.')
 @click.option('--num-markers', '-m', default=40, help='The number of marker genes to use (default 40).')
-@click.option('--outdir', '-o', default='genomesearch_refbank_output', help='The name of the output directory.')
+@click.option('--outdir', '-o', default='genomesearch_meta_refbank_output', help='The name of the output directory.')
 @click.option('--prefix', '-prefix', default='genomesearch', help='The prefix of all files in the output directory.')
 @click.option('--force/--no-force', default=False, help="Force overwriting of output directory.")
 @click.option('--threads', '-t', default=16, help="Number of threads to use for diamond searches.")
