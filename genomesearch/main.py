@@ -6,7 +6,7 @@ from genomesearch.isolate import _uhgg as isolate_uhgg
 from genomesearch.meta import _refbank as meta_refbank
 from genomesearch.meta import _uhgg as meta_uhgg
 
-from genomesearch.install import _install
+from genomesearch.install import _install, check_database
 
 @click.group(cls=CustomHelp)
 def cli():
@@ -24,7 +24,7 @@ def install(threads, force):
 @cli.group(short_help='Run genomesearch on a complete or draft sequence of a single isolate.')
 def isolate():
     """A click access point for the run module. This is used for creating the command line interface."""
-    pass
+    check_database()
 
 @isolate.command(short_help='Run genomesearch isolate on the RefSeq/GenBank (RefBank) database.')
 @click.argument('fasta', type=click.Path(exists=True))
@@ -71,7 +71,7 @@ def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, mi
 @cli.group(short_help='Run genomesearch on a metagenomic assembly with multiple unbinned sequences.')
 def meta():
     """A click access point for the run module. This is used for creating the command line interface."""
-    pass
+    check_database()
 
 @meta.command(short_help='Run genomesearch meta on the RefSeq/GenBank (RefBank) database.')
 @click.argument('fasta', type=click.Path(exists=True))

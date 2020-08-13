@@ -2,9 +2,10 @@ from genomesearch import *
 import click
 import wget, sys
 from os import makedirs, remove
-from os.path import join, dirname, isfile
+from os.path import join, dirname, isfile, isdir
 from multiprocessing import Pool
 from itertools import cycle
+from glob import glob
 
 
 def _install(threads, force):
@@ -112,3 +113,37 @@ def download_uhgg_unique_marker(marker, force):
             remove(local_path_pkl)
         wget.download(remote_path_pkl, local_path_pkl)
         print()
+
+def check_database():
+    click.echo("#### CHECKING DATABASE ####")
+    if isfile(REFBANK_SQLDB_PATH):
+        click.echo("RefBank SQL database is installed.")
+    else:
+        click.echo("Databases are not installed, please run \"genomesearch install\"")
+        sys.exit()
+
+    if isfile(UHGG_SQLDB_PATH):
+        click.echo("UHGG SQL database is installed.")
+    else:
+        click.echo("Databases are not installed, please run \"genomesearch install\"")
+        sys.exit()
+
+    if isfile(PHYLOPHLAN_MARKER_PATH):
+        click.echo("Phylophlan marker database is installed.")
+    else:
+        click.echo("Databases are not installed, please run \"genomesearch install\"")
+        sys.exit()
+
+    if isdir(REFBANK_UNIQUE_MARKERS_PATH) and len(glob(join(REFBANK_UNIQUE_MARKERS_PATH, '*dmnd'))) > 0 and len(glob(join(REFBANK_UNIQUE_MARKERS_PATH, '*pkl'))) > 0:
+        click.echo("RefBank marker gene database is installed")
+    else:
+        click.echo("Databases are not installed, please run \"genomesearch install\"")
+        sys.exit()
+
+    if isdir(UHGG_UNIQUE_MARKERS_PATH) and len(glob(join(UHGG_UNIQUE_MARKERS_PATH, '*dmnd'))) > 0 and len(glob(join(UHGG_UNIQUE_MARKERS_PATH, '*pkl'))) > 0:
+        click.echo("UHGG marker gene database is installed")
+    else:
+        click.echo("Databases are not installed, please run \"genomesearch install\"")
+        sys.exit()
+
+    click.echo("###########################")
