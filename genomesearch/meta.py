@@ -4,6 +4,7 @@ import shutil
 import click
 import sys
 import os
+from os import remove
 from genomesearch.prodigal import run_prodigal_multithread
 from genomesearch.isolate import run_refbank_unique_marker_search, run_uhgg_unique_marker_search
 from genomesearch import *
@@ -46,6 +47,8 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
         marker_output = join(outdir, prefix+'.markers.faa')
         click.echo("Identifying marker genes...")
         get_marker_genes(proteome_path, marker_output, prefix, threads)
+        if not keep_intermediate:
+            remove(marker_output + '.dmd.tsv')
     elif fasta_type == 'markers':
         marker_output = fasta
     marker_gene_end = time.time()
@@ -105,6 +108,8 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, m
         marker_output = join(outdir, prefix+'.markers.faa')
         click.echo("Identifying marker genes...")
         get_marker_genes(proteome_path, marker_output, prefix, threads)
+        if not keep_intermediate:
+            remove(marker_output + '.dmd.tsv')
     elif fasta_type == 'markers':
         marker_output = fasta
     marker_gene_end = time.time()
