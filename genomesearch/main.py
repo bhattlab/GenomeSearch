@@ -37,13 +37,14 @@ def isolate():
 @click.option('--min-percent-identity', '-mpi', default=50, help="The minimum percent identity to keep a marker match from the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+@click.option('--markers-only/--no-markers-only', default=False, help="Only find the phylophlan markers, don't search against database.")
+def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type, markers_only):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity,
-               keep_intermediate=keep_intermediate, fasta_type=fasta_type)
+               keep_intermediate=keep_intermediate, fasta_type=fasta_type, markers_only=markers_only)
     isolate_refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity,
-                    keep_intermediate, fasta_type)
+                    keep_intermediate, fasta_type, markers_only)
 
 
 @isolate.command(short_help='Run genomesearch isolate on the Unified Human Gastrointestinal Genome (UHGG) database.')
@@ -57,12 +58,14 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 @click.option('--min-percent-identity', '-mpi', default=50, help="The minimum percent identity to keep a marker match from the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+@click.option('--markers-only/--no-markers-only', default=False, help="Only find the phylophlan markers, don't search against database.")
+def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type, markers_only):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
                max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity,
-               keep_intermediate=keep_intermediate, fasta_type=fasta_type)
-    isolate_uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type)
+               keep_intermediate=keep_intermediate, fasta_type=fasta_type, markers_only=markers_only)
+    isolate_uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity,
+                 keep_intermediate, fasta_type, markers_only)
 
 
 @cli.group(short_help='Run genomesearch on a metagenomic assembly with multiple unbinned sequences.')
@@ -81,11 +84,14 @@ def meta():
 @click.option('--min-percent-identity', '-mpi', default=80, help="The minimum percent identity to keep a marker match from the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+@click.option('--markers-only/--no-markers-only', default=False, help="Only find the phylophlan markers, don't search against database.")
+def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type, markers_only):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
-               max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
-    meta_refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type)
+               max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity,
+               keep_intermediate=keep_intermediate, fasta_type=fasta_type, markers_only=markers_only)
+    meta_refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity,
+                 keep_intermediate, fasta_type, markers_only)
 
 @meta.command(short_help='Run genomesearch meta on the Unified Human Gastrointestinal Genome (UHGG) database.')
 @click.argument('fasta', type=click.Path(exists=True))
@@ -98,11 +104,14 @@ def refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs,
 @click.option('--min-percent-identity', '-mpi', default=80, help="The minimum percent identity to keep a marker match from the diamond search.")
 @click.option('--keep-intermediate/--no-keep-intermediate', default=False, help="Keep intermediate files.")
 @click.option('--fasta-type', '-ft', type=click.Choice(['genome', 'proteome', 'markers']), default='genome', help="Select the type of fasta input.")
-def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+@click.option('--markers-only/--no-markers-only', default=False, help="Only find the phylophlan markers, don't search against database.")
+def uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type, markers_only):
     """A click access point for the run module. This is used for creating the command line interface."""
     log_params(fasta=fasta, num_markers=num_markers, outdir=outdir, prefix=prefix, force=force, threads=threads,
-               max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity, keep_intermediate=keep_intermediate, fasta_type=fasta_type)
-    meta_uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type)
+               max_target_seqs=max_target_seqs, min_percent_identity=min_percent_identity,
+               keep_intermediate=keep_intermediate, fasta_type=fasta_type, markers_only=markers_only)
+    meta_uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity,
+              keep_intermediate, fasta_type, markers_only)
 
 def log_params(**kwargs):
     click.echo("#### PARAMETERS ####")

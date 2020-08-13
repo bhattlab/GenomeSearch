@@ -18,7 +18,8 @@ from multiprocessing import Pool
 import pickle
 
 
-def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity,
+             keep_intermediate, fasta_type, markers_only):
 
     tmpdir = join(outdir, 'tmp')
 
@@ -48,6 +49,16 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     elif fasta_type == 'markers':
         marker_output = fasta
     marker_gene_end = time.time()
+
+    if markers_only:
+        if not keep_intermediate:
+            shutil.rmtree(tmpdir)
+
+        print()
+        print("COMPLETE.")
+        print("Prodigal runtime: %f" % (prodigal_end - prodigal_start))
+        print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
+        sys.exit()
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_refbank_closest_genomes(
@@ -67,7 +78,8 @@ def _refbank(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs
     print("Closest genome runtime: %f" % closest_genomes_time)
     print("Gene count runtime: %f" % gene_count_time)
 
-def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate, fasta_type):
+def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, min_percent_identity, keep_intermediate,
+          fasta_type, markers_only):
 
     tmpdir = join(outdir, 'tmp')
     if force and isdir(outdir):
@@ -96,6 +108,16 @@ def _uhgg(fasta, num_markers, outdir, prefix, force, threads, max_target_seqs, m
     elif fasta_type == 'markers':
         marker_output = fasta
     marker_gene_end = time.time()
+
+    if markers_only:
+        if not keep_intermediate:
+            shutil.rmtree(tmpdir)
+
+        print()
+        print("COMPLETE.")
+        print("Prodigal runtime: %f" % (prodigal_end - prodigal_start))
+        print("Marker gene runtime: %f" % (marker_gene_end - marker_gene_start))
+        sys.exit()
 
     click.echo("Searching for closest genomes in database...")
     closest_genomes_path, gene_count_time, closest_genomes_time = get_uhgg_closest_genomes(
