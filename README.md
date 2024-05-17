@@ -1,3 +1,6 @@
+2024-05-17 update: This tool no longer works as the database reference is not being served anymore.
+
+
 # *GenomeSearch*
 A command line tool to quickly identify closely related genomes using a marker-gene based approach.
 
